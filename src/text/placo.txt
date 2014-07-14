@@ -1,0 +1,562 @@
+return {
+  count = 1202589,
+  size = 10625603,
+  [13141136] = {
+    name = 'geraMapeamento',
+    count = 1,
+    size = 2,
+    parents = {
+      [13039472] = {
+        count = 1,
+        size = 2,
+      },
+    },
+  },
+  [13056272] = {
+    name = 'get_autores',
+    count = 70050,
+    size = 104052,
+    parents = {
+      [13057136] = {
+        count = 70050,
+        size = 104052,
+      },
+    },
+  },
+  [13034496] = {
+    name = 'tostring',
+    count = 1,
+    size = 5,
+    parents = {
+      [12929888] = {
+        count = 1,
+        size = 5,
+      },
+    },
+  },
+  [4294032] = {
+    name = 'for iterator',
+    count = 1,
+    size = 1,
+    parents = {
+      [13130704] = {
+        count = 1,
+        size = 1,
+      },
+    },
+  },
+  [4295392] = {
+    name = 'pairs',
+    count = 11,
+    size = 12,
+    parents = {
+      [13056272] = {
+        count = 1,
+        size = 2,
+      },
+      [13096496] = {
+        count = 10,
+        size = 10,
+      },
+    },
+  },
+  [468361648] = {
+    name = 'new',
+    count = 175,
+    size = 175,
+    parents = {
+      [13135904] = {
+        count = 175,
+        size = 175,
+      },
+    },
+  },
+  [13096496] = {
+    name = 'ticonv',
+    count = 244353,
+    size = 504276,
+    parents = {
+      [13096496] = {
+        count = 243427,
+        size = 420889,
+      },
+      [13050992] = {
+        count = 926,
+        size = 83387,
+      },
+    },
+  },
+  [13050784] = {
+    name = 'get_producoes',
+    count = 872,
+    size = 387958,
+    parents = {
+      [13050992] = {
+        count = 872,
+        size = 387958,
+      },
+    },
+  },
+  [13139456] = {
+    name = 'new',
+    count = 0,
+    size = 0,
+    parents = {
+    },
+  },
+  [13137552] = {
+    name = 'Lua',
+    count = 80079,
+    size = 83403,
+    parents = {
+      [468366224] = {
+        count = 80079,
+        size = 83403,
+      },
+    },
+  },
+  [13136464] = {
+    name = 'Lua',
+    count = 256590,
+    size = 256590,
+    parents = {
+      [468366224] = {
+        count = 256590,
+        size = 256590,
+      },
+    },
+  },
+  [4304896] = {
+    name = 'read',
+    count = 871,
+    size = 1356489,
+    parents = {
+      [13050992] = {
+        count = 871,
+        size = 1356489,
+      },
+    },
+  },
+  [12950944] = {
+    name = 'serialize',
+    count = 5522,
+    size = 17151,
+    parents = {
+      [12950864] = {
+        count = 5521,
+        size = 11771,
+      },
+      [12945328] = {
+        count = 1,
+        size = 5380,
+      },
+    },
+  },
+  [4293728] = {
+    name = 'print',
+    count = 3,
+    size = 3,
+    parents = {
+      [13310096] = {
+        count = 3,
+        size = 3,
+      },
+    },
+  },
+  [13309984] = {
+    name = 'acumula_tipos_producoes',
+    count = 2,
+    size = 2,
+    parents = {
+      [13310096] = {
+        count = 2,
+        size = 2,
+      },
+    },
+  },
+  [13138352] = {
+    name = 'find_elem',
+    count = 86,
+    size = 118,
+    parents = {
+      [13050784] = {
+        count = 9,
+        size = 13,
+      },
+      [13057024] = {
+        count = 2,
+        size = 4,
+      },
+      [13138352] = {
+        count = 69,
+        size = 93,
+      },
+      [13050944] = {
+        count = 2,
+        size = 2,
+      },
+      [13057136] = {
+        count = 2,
+        size = 3,
+      },
+      [13010064] = {
+        count = 2,
+        size = 3,
+      },
+    },
+  },
+  [13057024] = {
+    name = 'get_areas_conhecimento',
+    count = 39940,
+    size = 45655,
+    parents = {
+      [13057136] = {
+        count = 39940,
+        size = 45655,
+      },
+    },
+  },
+  [4319568] = {
+    name = 'gsub',
+    count = 2605,
+    size = 2636,
+    parents = {
+      [13057024] = {
+        count = 593,
+        size = 593,
+      },
+      [13039472] = {
+        count = 874,
+        size = 874,
+      },
+      [13075616] = {
+        count = 1138,
+        size = 1169,
+      },
+    },
+  },
+  [463978880] = {
+    name = 'iconv',
+    count = 83268,
+    size = 86081,
+    parents = {
+      [13096496] = {
+        count = 83268,
+        size = 86081,
+      },
+    },
+  },
+  [13135904] = {
+    name = 'parse',
+    count = 872,
+    size = 921678,
+    parents = {
+      [13139456] = {
+        count = 872,
+        size = 921678,
+      },
+    },
+  },
+  [468366224] = {
+    name = 'parse',
+    count = 872,
+    size = 921067,
+    parents = {
+      [13135904] = {
+        count = 872,
+        size = 921067,
+      },
+    },
+  },
+  [459756064] = {
+    name = 'dir',
+    count = 1,
+    size = 1,
+    parents = {
+      [12929888] = {
+        count = 1,
+        size = 1,
+      },
+    },
+  },
+  [4314096] = {
+    name = 'strformat',
+    count = 4854,
+    size = 5382,
+    parents = {
+      [13034496] = {
+        count = 2,
+        size = 2,
+      },
+      [12950864] = {
+        count = 4852,
+        size = 5380,
+      },
+    },
+  },
+  [13130704] = {
+    name = 'count',
+    count = 1,
+    size = 1,
+    parents = {
+      [13309536] = {
+        count = 1,
+        size = 1,
+      },
+    },
+  },
+  [4319536] = {
+    name = 'match',
+    count = 24,
+    size = 24,
+    parents = {
+      [13310096] = {
+        count = 24,
+        size = 24,
+      },
+    },
+  },
+  [4305392] = {
+    name = 'open',
+    count = 57,
+    size = 57,
+    parents = {
+      [13050992] = {
+        count = 57,
+        size = 57,
+      },
+    },
+  },
+  [4322512] = {
+    name = 'tconcat',
+    count = 1,
+    size = 1,
+    parents = {
+      [13034496] = {
+        count = 1,
+        size = 1,
+      },
+    },
+  },
+  [13050992] = {
+    name = 'carrega_lattes',
+    count = 796,
+    size = 2099121,
+    parents = {
+      [13310096] = {
+        count = 796,
+        size = 2099121,
+      },
+    },
+  },
+  [4292576] = {
+    name = 'C',
+    count = 3,
+    size = 3,
+    parents = {
+      [4293728] = {
+        count = 3,
+        size = 3,
+      },
+    },
+  },
+  [13132848] = {
+    name = 'get_valores',
+    count = 143810,
+    size = 206126,
+    parents = {
+      [13057136] = {
+        count = 143810,
+        size = 206126,
+      },
+    },
+  },
+  [13138832] = {
+    name = 'recsetmetatable',
+    count = 1559,
+    size = 922959,
+    parents = {
+      [13050992] = {
+        count = 872,
+        size = 921888,
+      },
+      [13138832] = {
+        count = 687,
+        size = 1071,
+      },
+    },
+  },
+  [12950864] = {
+    name = 'vserialize',
+    count = 10373,
+    size = 17151,
+    parents = {
+      [12950944] = {
+        count = 10373,
+        size = 17151,
+      },
+    },
+  },
+  [4312144] = {
+    name = 'upper',
+    count = 576,
+    size = 576,
+    parents = {
+      [13075616] = {
+        count = 576,
+        size = 576,
+      },
+    },
+  },
+  [13050944] = {
+    name = 'get_dados_pessoais',
+    count = 693,
+    size = 695,
+    parents = {
+      [13050992] = {
+        count = 693,
+        size = 695,
+      },
+    },
+  },
+  [459756240] = {
+    name = 'for iterator',
+    count = 84,
+    size = 84,
+    parents = {
+      [12929888] = {
+        count = 84,
+        size = 84,
+      },
+    },
+  },
+  [12929888] = {
+    name = 'main',
+    count = 0,
+    size = 0,
+    parents = {
+    },
+  },
+  [13137392] = {
+    name = 'Lua',
+    count = 5753,
+    size = 5753,
+    parents = {
+      [468366224] = {
+        count = 5753,
+        size = 5753,
+      },
+    },
+  },
+  [13039472] = {
+    name = 'Lua',
+    count = 22595,
+    size = 22599,
+    parents = {
+      [13075616] = {
+        count = 22595,
+        size = 22599,
+      },
+    },
+  },
+  [13310096] = {
+    name = 'obtem_dados_curriculo',
+    count = 796,
+    size = 2100557,
+    parents = {
+      [12929888] = {
+        count = 796,
+        size = 2100557,
+      },
+    },
+  },
+  [13057136] = {
+    name = 'get_dados_producao',
+    count = 82382,
+    size = 400982,
+    parents = {
+      [13050784] = {
+        count = 82382,
+        size = 400982,
+      },
+    },
+  },
+  [4321856] = {
+    name = 'tinsert',
+    count = 86016,
+    size = 89340,
+    parents = {
+      [13136464] = {
+        count = 184,
+        size = 184,
+      },
+      [13137552] = {
+        count = 80079,
+        size = 83403,
+      },
+      [13137392] = {
+        count = 5753,
+        size = 5753,
+      },
+    },
+  },
+  [12945328] = {
+    name = 'tofile',
+    count = 1,
+    size = 5380,
+    parents = {
+      [13309536] = {
+        count = 1,
+        size = 5380,
+      },
+    },
+  },
+  [13309536] = {
+    name = 'cria_arquivo',
+    count = 1,
+    size = 5382,
+    parents = {
+      [12929888] = {
+        count = 1,
+        size = 5382,
+      },
+    },
+  },
+  [13010064] = {
+    name = 'get_tag_numerica',
+    count = 13759,
+    size = 13760,
+    parents = {
+      [13057136] = {
+        count = 13759,
+        size = 13760,
+      },
+    },
+  },
+  [13075616] = {
+    name = 'format',
+    count = 24302,
+    size = 24337,
+    parents = {
+      [13057024] = {
+        count = 24302,
+        size = 24337,
+      },
+    },
+  },
+  [13138448] = {
+    name = 'list_children',
+    count = 17978,
+    size = 17978,
+    parents = {
+      [13056272] = {
+        count = 14958,
+        size = 14958,
+      },
+      [13050784] = {
+        count = 3020,
+        size = 3020,
+      },
+    },
+  },
+}

@@ -1,0 +1,293 @@
+-----------------------Fname-------------count------------size----------
+	  PARENT    	find_elem		69 (80%)		93 (78%)
+	  PARENT    	get_dados_pessoais		2 (2%)		2 (1%)
+	  PARENT    	get_producoes		9 (10%)		13 (11%)
+	  PARENT    	get_tag_numerica		2 (2%)		3 (2%)
+	  PARENT    	get_areas_conhecimento		2 (2%)		4 (3%)
+	  PARENT    	get_dados_producao		2 (2%)		3 (2%)
+    	 /
+FUNC	find_elem				86		118 bytes
+    	 \
+	  CHILD     	find_elem		69		93
+-----------------------Fname-------------count------------size----------
+	  PARENT    	cria_arquivo		1 (100%)		5380 (100%)
+    	 /
+FUNC	tofile				1		5380 bytes
+    	 \
+	  CHILD     	serialize		1		5380
+-----------------------Fname-------------count------------size----------
+	  PARENT    	format		576 (100%)		576 (100%)
+    	 /
+FUNC	upper				576		576 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	get_dados_producao		143810 (100%)		206126 (100%)
+    	 /
+FUNC	get_valores				143810		206126 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	parse		5753 (100%)		5753 (100%)
+    	 /
+FUNC	Lua				5753		5753 bytes
+    	 \
+	  CHILD     	tinsert		5753		5753
+-----------------------Fname-------------count------------size----------
+	  PARENT    	get_dados_producao		70050 (100%)		104052 (100%)
+    	 /
+FUNC	get_autores				70050		104052 bytes
+    	 \
+	  CHILD     	list_children		14958		14958
+	  CHILD     	pairs		1		2
+-----------------------Fname-------------count------------size----------
+	  PARENT    	vserialize		5521 (99%)		11771 (68%)
+	  PARENT    	tofile		1 (0%)		5380 (31%)
+    	 /
+FUNC	serialize				5522		17151 bytes
+    	 \
+	  CHILD     	vserialize		10373		17151
+-----------------------Fname-------------count------------size----------
+FUNC	new				0		0 bytes
+    	 \
+	  CHILD     	parse		872		921678
+-----------------------Fname-------------count------------size----------
+	  PARENT    	carrega_lattes		872 (100%)		387958 (100%)
+    	 /
+FUNC	get_producoes				872		387958 bytes
+    	 \
+	  CHILD     	list_children		3020		3020
+	  CHILD     	get_dados_producao		82382		400982
+	  CHILD     	find_elem		9		13
+-----------------------Fname-------------count------------size----------
+	  PARENT    	parse		175 (100%)		175 (100%)
+    	 /
+FUNC	new				175		175 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	tostring		2 (0%)		2 (0%)
+	  PARENT    	vserialize		4852 (99%)		5380 (99%)
+    	 /
+FUNC	strformat				4854		5382 bytes
+-----------------------Fname-------------count------------size----------
+FUNC	main				0		0 bytes
+    	 \
+	  CHILD     	cria_arquivo		1		5382
+	  CHILD     	for iterator		84		84
+	  CHILD     	tostring		1		5
+	  CHILD     	obtem_dados_curriculo		796		2100557
+	  CHILD     	dir		1		1
+-----------------------Fname-------------count------------size----------
+	  PARENT    	parse		80079 (100%)		83403 (100%)
+    	 /
+FUNC	Lua				80079		83403 bytes
+    	 \
+	  CHILD     	tinsert		80079		83403
+-----------------------Fname-------------count------------size----------
+	  PARENT    	get_dados_producao		13759 (100%)		13760 (100%)
+    	 /
+FUNC	get_tag_numerica				13759		13760 bytes
+    	 \
+	  CHILD     	find_elem		2		3
+-----------------------Fname-------------count------------size----------
+	  PARENT    	get_autores		14958 (83%)		14958 (83%)
+	  PARENT    	get_producoes		3020 (16%)		3020 (16%)
+    	 /
+FUNC	list_children				17978		17978 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	get_areas_conhecimento		24302 (100%)		24337 (100%)
+    	 /
+FUNC	format				24302		24337 bytes
+    	 \
+	  CHILD     	gsub		1138		1169
+	  CHILD     	Lua		22595		22599
+	  CHILD     	upper		576		576
+-----------------------Fname-------------count------------size----------
+	  PARENT    	Lua		1 (100%)		2 (100%)
+    	 /
+FUNC	geraMapeamento				1		2 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	get_autores		1 (9%)		2 (16%)
+	  PARENT    	ticonv		10 (90%)		10 (83%)
+    	 /
+FUNC	pairs				11		12 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	carrega_lattes		872 (55%)		921888 (99%)
+	  PARENT    	recsetmetatable		687 (44%)		1071 (0%)
+    	 /
+FUNC	recsetmetatable				1559		922959 bytes
+    	 \
+	  CHILD     	recsetmetatable		687		1071
+-----------------------Fname-------------count------------size----------
+	  PARENT    	carrega_lattes		693 (100%)		695 (100%)
+    	 /
+FUNC	get_dados_pessoais				693		695 bytes
+    	 \
+	  CHILD     	find_elem		2		2
+-----------------------Fname-------------count------------size----------
+	  PARENT    	Lua		80079 (93%)		83403 (93%)
+	  PARENT    	Lua		5753 (6%)		5753 (6%)
+	  PARENT    	Lua		184 (0%)		184 (0%)
+    	 /
+FUNC	tinsert				86016		89340 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	Lua		874 (33%)		874 (33%)
+	  PARENT    	get_areas_conhecimento		593 (22%)		593 (22%)
+	  PARENT    	format		1138 (43%)		1169 (44%)
+    	 /
+FUNC	gsub				2605		2636 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	get_producoes		82382 (100%)		400982 (100%)
+    	 /
+FUNC	get_dados_producao				82382		400982 bytes
+    	 \
+	  CHILD     	find_elem		2		3
+	  CHILD     	get_tag_numerica		13759		13760
+	  CHILD     	get_autores		70050		104052
+	  CHILD     	get_valores		143810		206126
+	  CHILD     	get_areas_conhecimento		39940		45655
+-----------------------Fname-------------count------------size----------
+	  PARENT    	get_dados_producao		39940 (100%)		45655 (100%)
+    	 /
+FUNC	get_areas_conhecimento				39940		45655 bytes
+    	 \
+	  CHILD     	gsub		593		593
+	  CHILD     	format		24302		24337
+	  CHILD     	find_elem		2		4
+-----------------------Fname-------------count------------size----------
+	  PARENT    	main		1 (100%)		5382 (100%)
+    	 /
+FUNC	cria_arquivo				1		5382 bytes
+    	 \
+	  CHILD     	tofile		1		5380
+	  CHILD     	count		1		1
+-----------------------Fname-------------count------------size----------
+	  PARENT    	obtem_dados_curriculo		796 (100%)		2099121 (100%)
+    	 /
+FUNC	carrega_lattes				796		2099121 bytes
+    	 \
+	  CHILD     	get_dados_pessoais		693		695
+	  CHILD     	get_producoes		872		387958
+	  CHILD     	read		871		1356489
+	  CHILD     	recsetmetatable		872		921888
+	  CHILD     	open		57		57
+	  CHILD     	ticonv		926		83387
+-----------------------Fname-------------count------------size----------
+	  PARENT    	format		22595 (100%)		22599 (100%)
+    	 /
+FUNC	Lua				22595		22599 bytes
+    	 \
+	  CHILD     	geraMapeamento		1		2
+	  CHILD     	gsub		874		874
+-----------------------Fname-------------count------------size----------
+	  PARENT    	main		84 (100%)		84 (100%)
+    	 /
+FUNC	for iterator				84		84 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	print		3 (100%)		3 (100%)
+    	 /
+FUNC	C				3		3 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	obtem_dados_curriculo		24 (100%)		24 (100%)
+    	 /
+FUNC	match				24		24 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	serialize		10373 (100%)		17151 (100%)
+    	 /
+FUNC	vserialize				10373		17151 bytes
+    	 \
+	  CHILD     	serialize		5521		11771
+	  CHILD     	strformat		4852		5380
+-----------------------Fname-------------count------------size----------
+	  PARENT    	main		796 (100%)		2100557 (100%)
+    	 /
+FUNC	obtem_dados_curriculo				796		2100557 bytes
+    	 \
+	  CHILD     	acumula_tipos_producoes		2		2
+	  CHILD     	carrega_lattes		796		2099121
+	  CHILD     	match		24		24
+	  CHILD     	print		3		3
+-----------------------Fname-------------count------------size----------
+	  PARENT    	obtem_dados_curriculo		3 (100%)		3 (100%)
+    	 /
+FUNC	print				3		3 bytes
+    	 \
+	  CHILD     	C		3		3
+-----------------------Fname-------------count------------size----------
+	  PARENT    	parse		872 (100%)		921067 (100%)
+    	 /
+FUNC	parse				872		921067 bytes
+    	 \
+	  CHILD     	Lua		80079		83403
+	  CHILD     	Lua		5753		5753
+	  CHILD     	Lua		256590		256590
+-----------------------Fname-------------count------------size----------
+	  PARENT    	ticonv		83268 (100%)		86081 (100%)
+    	 /
+FUNC	iconv				83268		86081 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	carrega_lattes		871 (100%)		1356489 (100%)
+    	 /
+FUNC	read				871		1356489 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	cria_arquivo		1 (100%)		1 (100%)
+    	 /
+FUNC	count				1		1 bytes
+    	 \
+	  CHILD     	for iterator		1		1
+-----------------------Fname-------------count------------size----------
+	  PARENT    	carrega_lattes		57 (100%)		57 (100%)
+    	 /
+FUNC	open				57		57 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	main		1 (100%)		1 (100%)
+    	 /
+FUNC	dir				1		1 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	new		872 (100%)		921678 (100%)
+    	 /
+FUNC	parse				872		921678 bytes
+    	 \
+	  CHILD     	new		175		175
+	  CHILD     	parse		872		921067
+-----------------------Fname-------------count------------size----------
+	  PARENT    	obtem_dados_curriculo		2 (100%)		2 (100%)
+    	 /
+FUNC	acumula_tipos_producoes				2		2 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	tostring		1 (100%)		1 (100%)
+    	 /
+FUNC	tconcat				1		1 bytes
+-----------------------Fname-------------count------------size----------
+	  PARENT    	main		1 (100%)		5 (100%)
+    	 /
+FUNC	tostring				1		5 bytes
+    	 \
+	  CHILD     	strformat		2		2
+	  CHILD     	tconcat		1		1
+-----------------------Fname-------------count------------size----------
+	  PARENT    	ticonv		243427 (99%)		420889 (83%)
+	  PARENT    	carrega_lattes		926 (0%)		83387 (16%)
+    	 /
+FUNC	ticonv				244353		504276 bytes
+    	 \
+	  CHILD     	iconv		83268		86081
+	  CHILD     	pairs		10		10
+	  CHILD     	ticonv		243427		420889
+-----------------------Fname-------------count------------size----------
+	  PARENT    	parse		256590 (100%)		256590 (100%)
+    	 /
+FUNC	Lua				256590		256590 bytes
+    	 \
+	  CHILD     	tinsert		184		184
+-----------------------Fname-------------count------------size----------
+	  PARENT    	count		1 (100%)		1 (100%)
+    	 /
+FUNC	for iterator				1		1 bytes
+------------------------------------------------------------------------
+obtem_dados_curriculo	2100557
+carrega_lattes	2099121
+read	1356489
+recsetmetatable	922959
+parse	921678
+parse	921067
+ticonv	504276
+get_dados_producao	400982
+get_producoes	387958
+Lua	256590
+46

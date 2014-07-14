@@ -1,0 +1,28 @@
+- porque pode-se ter apenas uma funcao de hook?
+
+- logo que defino um sethook call+return ele jah chama um de return. isso atrapalha minha pilha. O que fazer?
+Esse primeiro cara sempre acontece? posso ignorar na marra?
+
+- como fazer debug.getinfo(2, "f") in C?
+
+- pilha com limite maximo.
+  . qual limite?
+  . usar malloc e depois realloc?
+  . como retornar o erro?
+
+- usar a propria estrutura de Lua ou criar uma nova?
+.. melhor nao , pois vou ter que levar em conta minha estrutura.
+
+- qual eh o env que minha funcao estah executando? O que seria um setlocal?
+
+- Quantas funcoes um programa deve ter? Qual o tamanho do hash?
+
+- Como fazer um hash de uma funcao? Usar apenas o endereco?
+
+- funcoes identicas para dois hashes distintos. O que fazer?
+
+- Inserir na frente ou atras do hash?
+
+- fazer um contador geral da funcao ou somar tudo apenas no final?
+
+
