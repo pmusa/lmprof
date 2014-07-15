@@ -19,7 +19,8 @@ static lmprof_hash  *func_calls;
 static int ignore_first_return;
 
 
-static void insert(lua_State *L, uintptr_t key, lua_Debug *ar) {
+static lmprof_hash insert(lua_State *L, uintptr_t function, uintptr_t parent,
+                                                     lua_Debug *ar) {
   const char *name;
   lua_getinfo(L, "n", ar);
   if (ar-> name != NULL) {
@@ -30,27 +31,29 @@ static void insert(lua_State *L, uintptr_t key, lua_Debug *ar) {
 //printf("source: %s - short_src: %s - linedefined: %d - lastlinedefined: %d - what: %s\n", ar->source, ar->short_src, ar->linedefined, ar->lastlinedefined, ar->what);    
     name = ar->what;
   }
-  lmprof_hash_insert(func_calls, key, name);
+  lua_settop(L, -1);
+  return lmprof_hash_insert(func_calls, function, parent, name);
 }
 
-static void XXX(lua_State *L, lua_Debug * ar, int omem, int nmem) {
-  uintptr_t key;
+static void XXX(lua_State *L, lua_Debug * far, int omem, int nmem) {
+  lmprof_hash v;
+  uintptr_t function;
+  uintptr_t parent;
   lua_Debug par;
-  lua_getinfo(L, "f", ar);
-  key = (uintptr_t) lua_topointer(L, -1);
-  if ( ! lmprof_hash_exists(func_calls, key)) {
-    insert(L, key, ar);
+
+  lua_getinfo(L, "f", far);
+  function = (uintptr_t) lua_topointer(L, -1);
+
+  lua_getstack(L, 1, &par);
+  lua_getinfo(L, "f", &par);
+  parent = (uintptr_t) lua_topointer(L, -1);
+
+  v = lmprof_hash_get(func_calls, function, parent);
+  if ( v == NULL ) {
+    v = insert(L, function, parent, far);
   }
 
-  if (lua_getstack(L, 1, &par)) {
-    uintptr_t parent;
-    lua_getinfo(L, "f", &par);
-    parent = (uintptr_t) lua_topointer(L, -1);
-    if ( ! lmprof_hash_exists(func_calls, parent)) {
-     insert(L, parent, &par);
-    }
-    lmprof_hash_update(func_calls, key, parent, nmem - omem);
-  }
+  lmprof_hash_update(func_calls, v, nmem - omem);
   lua_settop(L, -2);
 }
 

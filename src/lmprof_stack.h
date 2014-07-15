@@ -1,7 +1,7 @@
 #ifndef LMPROF_STACK_H_INCLUDED
 #define LMPROF_STACK_H_INCLUDED
  
-#define LMPROF_STACK_SIZE 20
+#define LMPROF_STACK_SIZE 200
 
 typedef struct lmprof_stack lmprof_stack;
 

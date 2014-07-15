@@ -11,17 +11,18 @@ int main (void) {
 
 //printf("Hash created\n");
   for (i = 0; i < N; i++) {
-    uintptr_t key = rand() % 10;
+    uintptr_t function = rand() % 10;
     uintptr_t parent = rand() % 10;
     size_t size = rand() % 100;
-    if (!lmprof_hash_exists(h, key)) {
+    lmprof_hash v = lmprof_hash_get(h, function, parent);
+    if (v == NULL) {
       char name[3];
-      name[0] = 'f'; name[1] = '0' + key; name[2] = '\0';
+      name[0] = 'f'; name[1] = '0' + function; name[2] = '\0';
 //printf("Inserting k: %d - n: %s\n", (int) key, name);
-      lmprof_hash_insert(h, key, name);
+      v = lmprof_hash_insert(h, function, parent, name);
     } 
-//printf("Updating k: %d - p: %d - size: %d\n", (int)key, (int)parent, (int)size);
-    lmprof_hash_update(h, key, parent, size);
+printf("Updating f: %d - p: %d - size: %d\n", (int)function, (int)parent, (int)size);
+    lmprof_hash_update(h, v, size);
   }
 
   lmprof_hash_print(h, "hash_test.lua");
