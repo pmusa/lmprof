@@ -1,3 +1,4 @@
 test/placo/*
 *.so
 *.out
+*.o
