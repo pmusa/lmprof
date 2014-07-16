@@ -1,3 +1,5 @@
+from: 27 june 2014 to: 14 july 2014
+
 - porque pode-se ter apenas uma funcao de hook?
 -> simplicidade interna de Lua.
 
@@ -24,10 +26,17 @@ Esse primeiro cara sempre acontece? posso ignorar na marra?
 - fazer um contador geral da funcao ou somar tudo apenas no final?
 -> SOMAR TUDO APENAS NO FINAL. SEMPRE DIMINUIR O PESO DA LIB NO MOMENTO DA EXECUCAO.
 
+===============================================================================
+from: 15 june 2014 to: 
+
 - lua_newuserdata deve ser liberada?
 
 - Como colocar a estrutura da minha lib em Lua?
   . ter que pegar essa estrutura em todas as chamadas de hook vai ficar caro.
   . ter que pegar essa estrutura em todas as chamadas de alloc vai ficar caro.
+
+- A alocacao exata de cada funcao eh MTO mais complicado do que pensamos.
+  . considerar apenas o pai gera um resultado impreciso
+  . pensar em algoritmo eficiente para atualizar a pilha
 
 
