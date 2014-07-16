@@ -41,7 +41,7 @@ static int lmprof_write  (lua_State *L);
 /* LOCAL FUNCTIONS */
 static void lmprof_destroy(lua_State *L, const char *filename);
 static void lmprof_create_finalizer(lua_State *L, lua_Alloc f, void *ud);
-static void lmprof_update(lua_State *L, lua_Debug * far, int omem, int nmem);
+static void lmprof_update(lua_State *L, lua_Debug * far, size_t mem);
 
 /* FUNCTIONS USED BY LUA */
 /* allocation function used by Lua when luamemprofiler is used */
@@ -94,7 +94,7 @@ static lmprof_hash insert(lua_State *L, uintptr_t function, uintptr_t parent,
   return lmprof_hash_insert(func_calls, function, parent, name);
 }
 
-static void lmprof_update(lua_State *L, lua_Debug * far, int omem, int nmem) {
+static void lmprof_update(lua_State *L, lua_Debug * far, size_t mem) {
   lmprof_hash v;
   uintptr_t function;
   uintptr_t parent;
@@ -112,7 +112,7 @@ static void lmprof_update(lua_State *L, lua_Debug * far, int omem, int nmem) {
     v = insert(L, function, parent, far);
   }
 
-  lmprof_hash_update(func_calls, v, nmem - omem);
+  lmprof_hash_update(func_calls, v, mem);
   lua_settop(L, -2);
 }
 
@@ -130,14 +130,11 @@ void lmprof_hook(lua_State *L, lua_Debug *ar) {
       lua_error(L);
     }
   } else if (ar->event == LUA_HOOKRET) {
-    size_t nmem = alloc_count;
-    size_t omem = lmprof_stack_pop(mem_stack);
-    if (nmem > omem) {
-      lmprof_update(L, ar, omem, nmem);
-      /*printf("Mudanca de Tamanho: %d - %d - %d\n", omem, nmem, nmem - omem);*/
-    } else if (omem < nmem) {
-      lua_pushstring(L, "bug in the library");
-      lua_error(L);
+    if (lmprof_stack_is_diff(mem_stack, alloc_count)) {
+      size_t mem = lmprof_stack_smart_pop(mem_stack, alloc_count);
+      lmprof_update(L, ar, mem);
+    } else {
+      lmprof_stack_pop(mem_stack);
     }
   }
 }

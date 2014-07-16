@@ -115,9 +115,9 @@ void lmprof_hash_print(lmprof_hash *h, const char *file_name) {
   for (i = 0; i < LMPROF_HASH_SIZE; i++) {
     lmprof_fhash *fh = h[i];
     while (fh != NULL) {
-      fprintf(f, "  [\"%d_%d\"] = {\n", (int) fh->function, (int) fh->parent);
-      fprintf(f, "    func = '%d',\n", (int) fh->function);
-      fprintf(f, "    parent = '%d',\n", (int) fh->parent);
+      fprintf(f, "  [\"%lu%lu\"] = {\n", fh->function, fh->parent);
+      fprintf(f, "    func = '%lu',\n", fh->function);
+      fprintf(f, "    parent = '%lu',\n", fh->parent);
       fprintf(f, "    name = '%s',\n", fh->name);
       fprintf(f, "    count = %d,\n", fh->count);
       fprintf(f, "    size = %lu,\n", fh->size);
