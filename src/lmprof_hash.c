@@ -33,10 +33,10 @@ void         lmprof_hash_print   (lmprof_hash *h, const char *file_name);
 
 /**
  *
- *
+ * insert val into hash using a combination of function and parent as hash.
  *
  **/
-static void lmprof_fhash_insert(lmprof_fhash **h, uintptr_t function,
+static void lmprof_fhash_insert(lmprof_hash *h, uintptr_t function,
                                 uintptr_t parent, lmprof_fhash *val) {
   int index = hashpointer(function, parent);
   lmprof_fhash *fh = h[index];
@@ -115,7 +115,7 @@ void lmprof_hash_print(lmprof_hash *h, const char *file_name) {
   for (i = 0; i < LMPROF_HASH_SIZE; i++) {
     lmprof_fhash *fh = h[i];
     while (fh != NULL) {
-      fprintf(f, "  [%d_%d] = {\n", (int) fh->function, (int) fh->parent);
+      fprintf(f, "  [\"%d_%d\"] = {\n", (int) fh->function, (int) fh->parent);
       fprintf(f, "    func = '%d',\n", (int) fh->function);
       fprintf(f, "    parent = '%d',\n", (int) fh->parent);
       fprintf(f, "    name = '%s',\n", fh->name);

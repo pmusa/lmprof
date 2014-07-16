@@ -24,4 +24,10 @@ Esse primeiro cara sempre acontece? posso ignorar na marra?
 - fazer um contador geral da funcao ou somar tudo apenas no final?
 -> SOMAR TUDO APENAS NO FINAL. SEMPRE DIMINUIR O PESO DA LIB NO MOMENTO DA EXECUCAO.
 
+- lua_newuserdata deve ser liberada?
+
+- Como colocar a estrutura da minha lib em Lua?
+  . ter que pegar essa estrutura em todas as chamadas de hook vai ficar caro.
+  . ter que pegar essa estrutura em todas as chamadas de alloc vai ficar caro.
+
 

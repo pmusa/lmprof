@@ -4,7 +4,7 @@
 #include "lmprof_stack.h"
 
 struct lmprof_stack {
-  int stack[LMPROF_STACK_SIZE];
+  size_t stack[LMPROF_STACK_SIZE];
   int top;
 };
 
@@ -18,7 +18,7 @@ void lmprof_stack_destroy(lmprof_stack *s) {
   free(s);
 }
 
-int lmprof_stack_push(lmprof_stack *s, int e) {
+int lmprof_stack_push(lmprof_stack *s, size_t e) {
   s->top++;
   if (s->top > LMPROF_STACK_SIZE) {
     return 1;
@@ -27,7 +27,7 @@ int lmprof_stack_push(lmprof_stack *s, int e) {
   return 0;
 }
 
-int lmprof_stack_pop(lmprof_stack *s) {
+size_t lmprof_stack_pop(lmprof_stack *s) {
   s->top--;
   if (s->top < -1) {
     printf("error: Unable to pop from empty stack.\n");
