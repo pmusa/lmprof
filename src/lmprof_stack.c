@@ -3,23 +3,23 @@
 
 #include "lmprof_stack.h"
 
-struct lmprof_stack {
+struct lmprof_Stack {
   size_t stack[LMPROF_STACK_SIZE];
   size_t fix[LMPROF_STACK_SIZE];
   int top;
 };
 
-lmprof_stack* lmprof_stack_create() {
-  lmprof_stack* s = (lmprof_stack*) malloc (sizeof(lmprof_stack));
+lmprof_Stack* lmprof_stack_create (void) {
+  lmprof_Stack* s = (lmprof_Stack*) malloc (sizeof(lmprof_Stack));
   s->top = -1;
   return s;
 }
 
-void lmprof_stack_destroy(lmprof_stack *s) {
+void lmprof_stack_destroy (lmprof_Stack *s) {
   free(s);
 }
 
-int lmprof_stack_push(lmprof_stack *s, size_t e) {
+int lmprof_stack_push (lmprof_Stack *s, size_t e) {
   s->top++;
   if (s->top >= LMPROF_STACK_SIZE) {
     return 1;
@@ -29,14 +29,14 @@ int lmprof_stack_push(lmprof_stack *s, size_t e) {
   return 0;
 }
 
-int lmprof_stack_is_diff(lmprof_stack *s, size_t nmem) {
+int lmprof_stack_equal (lmprof_Stack *s, size_t nmem) {
   if (s->top > -1) {
     return nmem != s->stack[s->top];
   }
   return 1;
 }
  
-size_t lmprof_stack_pop(lmprof_stack *s) {
+size_t lmprof_stack_pop (lmprof_Stack *s) {
   s->top--;
   if (s->top < -1) {
     printf("error: Unable to pop from empty stack.\n");
@@ -45,7 +45,7 @@ size_t lmprof_stack_pop(lmprof_stack *s) {
   return s->stack[s->top + 1];
 }
 
-size_t lmprof_stack_smart_pop(lmprof_stack *s, size_t nmem) {
+size_t lmprof_stack_smart_pop (lmprof_Stack *s, size_t nmem) {
   size_t dmem;
 
   s->top--;

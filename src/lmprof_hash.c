@@ -7,49 +7,50 @@
 
 #define hashpointer(fptr, pptr)  ((((uintptr_t) fptr) ^ ((uintptr_t) pptr)) \
                                                         % LMPROF_HASH_SIZE)
+/*
+** {==================================================================
+** STRUCTS
+** ===================================================================
+*/
 
-typedef struct lmprof_fhash {
+typedef struct lmprof_FHash {
   uintptr_t function;
   uintptr_t parent;
   char *name;
   unsigned int count;
   size_t size;
-  struct lmprof_fhash *next;
-} lmprof_fhash;
+  struct lmprof_FHash *next;
+} lmprof_FHash;
 
-static lmprof_fhash* h[LMPROF_HASH_SIZE];
+/* }================================================================== */
 
-/* EXPORTED FUNCTIONS */
-lmprof_hash* lmprof_hash_create  ();
-void         lmprof_hash_destroy (lmprof_hash *h);
-lmprof_hash  lmprof_hash_insert  (lmprof_hash *h, uintptr_t function,
-                                  uintptr_t parent, const char *name);
-void         lmprof_hash_update  (lmprof_hash *h, lmprof_hash v, size_t size);
-lmprof_hash  lmprof_hash_get     (lmprof_hash *h, uintptr_t function,
-                                                  uintptr_t parent);
-void         lmprof_hash_print   (lmprof_hash *h, const char *file_name);
+/*
+** {==================================================================
+** LOCAL FUNCTIONS
+** ===================================================================
+*/
 
-/* LOCAL FUNCTIONS */
-
-/**
- *
- * insert val into hash using a combination of function and parent as hash.
- *
- **/
-static void lmprof_fhash_insert(lmprof_hash *h, uintptr_t function,
-                                uintptr_t parent, lmprof_fhash *val) {
+/* insert val into hash using a combination of function and parent as hash. */
+static void fhash_insert(lmprof_Hash *h, uintptr_t function,
+                                         uintptr_t parent, lmprof_FHash *val) {
   int index = hashpointer(function, parent);
-  lmprof_fhash *fh = h[index];
+  lmprof_FHash *fh = h[index];
   val->next = fh;
   h[index] = val;
 }
 
-/* GLOBAL FUNCTIONS */
+/* }================================================================== */
 
-lmprof_hash lmprof_hash_get(lmprof_hash *h, uintptr_t function,
+/*
+** {==================================================================
+** GLOBAL FUNCTIONS
+** ===================================================================
+*/
+
+lmprof_Hash lmprof_hash_get(lmprof_Hash *h, uintptr_t function,
                                             uintptr_t parent) {
   int index = hashpointer(function, parent);
-  lmprof_hash fh = h[index];
+  lmprof_Hash fh = h[index];
   while(fh != NULL) {
     if (function == fh->function && parent == fh->parent) {
       return fh;
@@ -59,9 +60,9 @@ lmprof_hash lmprof_hash_get(lmprof_hash *h, uintptr_t function,
   return fh;
 }
 
-lmprof_hash lmprof_hash_insert(lmprof_hash *h, uintptr_t function,
+lmprof_Hash lmprof_hash_insert(lmprof_Hash *h, uintptr_t function,
                                uintptr_t parent, const char *name) {
-  lmprof_fhash *val = (lmprof_fhash *) malloc (sizeof(lmprof_fhash));
+  lmprof_FHash *val = (lmprof_FHash *) malloc (sizeof(lmprof_FHash));
   val->function = function;
   val->parent = parent;
   val->name = (char *) malloc (strlen(name) + 1);
@@ -69,18 +70,19 @@ lmprof_hash lmprof_hash_insert(lmprof_hash *h, uintptr_t function,
   val->count = 0;
   val->size = 0;
   /* val->next = NULL; inserting in front, no need for that */
-  lmprof_fhash_insert(h, function, parent, val);
+  fhash_insert(h, function, parent, val);
   return val;
 }
 
-void lmprof_hash_update(lmprof_hash *hash, lmprof_hash v, size_t size) {
+void lmprof_hash_update(lmprof_Hash *hash, lmprof_Hash v, size_t size) {
   if (v != NULL) {
     v->count = v->count + 1;
     v->size = v->size + size;
   }
 }
 
-lmprof_hash* lmprof_hash_create() {
+lmprof_Hash* lmprof_hash_create() {
+  lmprof_Hash* h = (lmprof_Hash*) malloc (LMPROF_HASH_SIZE * sizeof(lmprof_Hash));
   int i;
   for (i = 0; i < LMPROF_HASH_SIZE; i++) {
     h[i] = NULL;
@@ -88,11 +90,11 @@ lmprof_hash* lmprof_hash_create() {
   return h;
 }
 
-void lmprof_hash_destroy(lmprof_hash *h) {
+void lmprof_hash_destroy(lmprof_Hash *h) {
   int i;
   for(i = 0; i < LMPROF_HASH_SIZE; i++) {
-    lmprof_fhash *fh;
-    lmprof_fhash *vfhead = h[i];
+    lmprof_FHash *fh;
+    lmprof_FHash *vfhead = h[i];
     while (vfhead != NULL) {
       fh = vfhead;
       free(fh->name);
@@ -100,20 +102,20 @@ void lmprof_hash_destroy(lmprof_hash *h) {
       free(fh);
     }
   }
-  return;
+  free(h);
 }
 
-void lmprof_hash_print(lmprof_hash *h, const char *file_name) {
+void lmprof_hash_print(lmprof_Hash *h, const char *filename) {
   int i;
-  FILE *f = fopen(file_name, "w");
+  FILE *f = fopen(filename, "w");
   if (f == NULL) {
-    printf("error: could open file: '%s'.", file_name);
+    printf("error: could open file: '%s'.", filename);
     exit(1);
   }
 
   fprintf(f, "return {\n");
   for (i = 0; i < LMPROF_HASH_SIZE; i++) {
-    lmprof_fhash *fh = h[i];
+    lmprof_FHash *fh = h[i];
     while (fh != NULL) {
       fprintf(f, "  [\"%lu%lu\"] = {\n", fh->function, fh->parent);
       fprintf(f, "    func = '%lu',\n", fh->function);
@@ -129,3 +131,6 @@ void lmprof_hash_print(lmprof_hash *h, const char *file_name) {
 
   fclose(f);
 }
+
+/* }================================================================== */
+

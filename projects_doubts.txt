@@ -27,16 +27,31 @@ Esse primeiro cara sempre acontece? posso ignorar na marra?
 -> SOMAR TUDO APENAS NO FINAL. SEMPRE DIMINUIR O PESO DA LIB NO MOMENTO DA EXECUCAO.
 
 ===============================================================================
-from: 15 june 2014 to: 
+from: 15 june 2014 to: 17 june 2014
 
 - lua_newuserdata deve ser liberada?
 
 - Como colocar a estrutura da minha lib em Lua?
   . ter que pegar essa estrutura em todas as chamadas de hook vai ficar caro.
+  => Por enquanto vamos ficar com uma estrutura global, porem com acesso unico via macro.
+  
   . ter que pegar essa estrutura em todas as chamadas de alloc vai ficar caro.
+  =? A chamada de alloc nao possui L!! O que fazer?
+
 
 - A alocacao exata de cada funcao eh MTO mais complicado do que pensamos.
   . considerar apenas o pai gera um resultado impreciso
-  . pensar em algoritmo eficiente para atualizar a pilha
+  => Menos informacao. Mas precisamos saber desempenho. Quanto mais coisa na fase final melhor.
 
+  . pensar em algoritmo eficiente para atualizar a pilha
+  => Bom, mas precisa ser medido. Eh mais preciso!!
+
+===============================================================================
+from: 17 june 2014 to:
+
+- lua_newuserdata deve ser liberada?
+
+- Tratar tail call.
+
+- A chamada de alloc nao possui L!! Como pegar o state da biblioteca?
 

@@ -4,3 +4,5 @@ test/placo/*
 *.o
 *lmprof_default_output.txt
 *.swp
+lixo/*
+test/rollof/*

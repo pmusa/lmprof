@@ -6,15 +6,15 @@
  
 #define LMPROF_HASH_SIZE 17
 
-typedef struct lmprof_fhash* lmprof_hash;
+typedef struct lmprof_FHash* lmprof_Hash;
 
-lmprof_hash* lmprof_hash_create  ();
-void         lmprof_hash_destroy (lmprof_hash *h);
-lmprof_hash  lmprof_hash_insert  (lmprof_hash *h, uintptr_t function,
+lmprof_Hash* lmprof_hash_create  (void);
+void         lmprof_hash_destroy (lmprof_Hash *h);
+lmprof_Hash  lmprof_hash_insert  (lmprof_Hash *h, uintptr_t function,
                                   uintptr_t parent, const char *name);
-void         lmprof_hash_update  (lmprof_hash *h, lmprof_hash v, size_t size);
-lmprof_hash  lmprof_hash_get     (lmprof_hash *h, uintptr_t function,
+void         lmprof_hash_update  (lmprof_Hash *h, lmprof_Hash v, size_t size);
+lmprof_Hash  lmprof_hash_get     (lmprof_Hash *h, uintptr_t function,
                                                   uintptr_t parent);
-void         lmprof_hash_print   (lmprof_hash *h, const char *file_name);
+void         lmprof_hash_print   (lmprof_Hash *h, const char *filename);
 
 #endif

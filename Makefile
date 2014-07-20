@@ -16,11 +16,17 @@ LUA_LIBS = -llua5.2
 
 all: $(LIB_NAME).so
 
-lmprof.so: $(LIB_NAME).o
-	cd src && $(CC) lmprof_stack.o lmprof_hash.o $(LIB_NAME).o -o $(LIB_NAME).so $(CFLAGS) $(LUA_LIBS) && mv $(LIB_NAME).so ../
+install: lmprof.so
+	cp lmprof.so /usr/local/lib/lua/5.2/
 
-lmprof.o: lmprof_stack.o lmprof_hash.o
+lmprof.so: $(LIB_NAME).o
+	cd src && $(CC) lmprof_lstrace.o lmprof_stack.o lmprof_hash.o $(LIB_NAME).o -o $(LIB_NAME).so $(CFLAGS) $(LUA_LIBS) && mv $(LIB_NAME).so ../
+
+lmprof.o: lmprof_stack.o lmprof_hash.o lmprof_lstrace.o
 	cd src && $(CC) -c $(LIB_NAME).c $(CFLAGS) $(LUA_CFLAGS)
+
+lmprof_lstrace.o:
+	cd src && $(CC) -c lmprof_lstrace.c $(CFLAGS) $(LUA_CFLAGS)
 
 lmprof_hash.o:
 	cd src && $(CC) -c lmprof_hash.c $(CFLAGS)
