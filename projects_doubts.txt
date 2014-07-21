@@ -57,3 +57,7 @@ from: 17 june 2014 to:
 
 - A chamada de alloc nao possui L!! Como pegar o state da biblioteca?
 
+- Agora que temos a chave baseada em 'fp', como fazer para cadastrar pais que
+nunca sao chamados?
+
+- Quantas colisoes?

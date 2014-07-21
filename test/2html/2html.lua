@@ -1,5 +1,8 @@
 #!/home/roberto/prj/lua/lua
 
+local lmprof = require"lmprof"
+lmprof.start()
+
 -- special marks:
 -- \1 - paragraph (empty line)
 -- \4 - remove spaces around it
@@ -512,3 +515,4 @@ t = string.gsub(t, "</p>", "")
 
 io.write(header, t, footer)
 
+lmprof.stop()

@@ -92,7 +92,7 @@ static lmprof_State gst;
 ** ===================================================================
 */
 
-static void update(lua_State *L, lmprof_State *st, lua_Debug * far, size_t mem) {
+static void update (lua_State *L, lmprof_State *st, lua_Debug * far, size_t mem) {
   lmprof_Hash v;
   uintptr_t function;
   uintptr_t parent;
@@ -115,7 +115,7 @@ static void update(lua_State *L, lmprof_State *st, lua_Debug * far, size_t mem) 
 }
 
 
-static void set_lua_alloc(lua_State *L, int remove_finalizer) {
+static void set_lua_alloc (lua_State *L, int remove_finalizer) {
   lmprof_Alloc *s;
 
   /* get original alloc function and opaque pointer */
@@ -137,7 +137,7 @@ static void set_lua_alloc(lua_State *L, int remove_finalizer) {
   }
 }
 
-static void set_lmprof_alloc(lua_State *L, int insert_finalizer) {
+static void set_lmprof_alloc (lua_State *L, int insert_finalizer) {
   static lua_Alloc f;
   static void *ud;
   /* get default allocation function */
@@ -166,7 +166,7 @@ static void set_lmprof_alloc(lua_State *L, int insert_finalizer) {
 }
 
 
-static void hook(lua_State *L, lua_Debug *ar) {
+static void hook (lua_State *L, lua_Debug *ar) {
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
   if (st->ignore_return) {
     st->ignore_return = 0;
@@ -188,17 +188,24 @@ the memory profile.", LMPROF_STACK_SIZE, LMPROF_STACK_DUMP_FILENAME,
       break;
     }
     case LUA_HOOKRET:
-      if (!lmprof_stack_equal(st->mem_stack, st->alloc_count)) {
-        lmprof_stack_pop(st->mem_stack);
+      if (lmprof_stack_equal(st->mem_stack, st->alloc_count)) {
+        int err = lmprof_stack_pop(st->mem_stack);
+        if (err) {
+          set_lua_alloc(L, TRUE);
+          destroy(L, st, LMPROF_DEFAULT_OUTPUT_FILENAME);
+          luaL_error(L, "unable to pop from empty stack. you did not call stop \
+or called stop in a level 'upper' than start was called.");
+        }
       } else {
         size_t mem = lmprof_stack_smart_pop(st->mem_stack, st->alloc_count);
         update(L, st, ar, mem);
       }
+      /* TODO: tailcall case, there is a BUG */
       break;
   }
 }
 
-static void destroy(lua_State *L, lmprof_State *st, const char *filename) {
+static void destroy (lua_State *L, lmprof_State *st, const char *filename) {
   lmprof_stack_destroy(st->mem_stack);
   lmprof_hash_print(st->func_calls, filename);
   lmprof_hash_destroy(st->func_calls);
@@ -230,7 +237,7 @@ static int finalize (lua_State *L) {
 }
 
 /* Register finalize function as metatable */
-static void create_finalizer(lua_State *L, lua_Alloc f, void *ud) {
+static void create_finalizer (lua_State *L, lua_Alloc f, void *ud) {
   lmprof_Alloc *s;
 
   /* create metatable with finalize function (__gc field) */
@@ -265,8 +272,9 @@ static void *alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
   return realloc(ptr, nsize);
 }
 
-static int start(lua_State *L) {
+static int start (lua_State *L) {
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
+  lua_Debug ar;
 
   set_lmprof_alloc(L, TRUE);
 
@@ -275,11 +283,16 @@ static int start(lua_State *L) {
   st->ignore_return = 1;
   st->mem_stack = lmprof_stack_create();
   st->func_calls = lmprof_hash_create();
+
+  /* register calling function into hash */
+  lua_getstack(L, 1, &ar);
+  update(L, st, &ar, 0);
+
   lua_sethook(L, hook, LUA_MASKCALL | LUA_MASKRET, 0);
   return 0;
 }
 
-static int stop(lua_State *L) {
+static int stop (lua_State *L) {
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
   const char *filename = LMPROF_DEFAULT_OUTPUT_FILENAME;
 
@@ -292,13 +305,13 @@ static int stop(lua_State *L) {
   return 0;
 }
 
-static int pause(lua_State *L) {
+static int pause (lua_State *L) {
   set_lua_alloc(L, FALSE);
   lua_sethook(L, hook, 0, 0);
   return 0;
 }
 
-static int resume(lua_State *L) {
+static int resume (lua_State *L) {
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
   set_lmprof_alloc(L, FALSE);
   st->ignore_return = 1;
@@ -306,7 +319,7 @@ static int resume(lua_State *L) {
   return 0;
 }
 
-static int write(lua_State *L) {
+static int write (lua_State *L) {
   const char *filename = luaL_checkstring(L, 1);
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
   lmprof_hash_print(st->func_calls, filename);

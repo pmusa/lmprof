@@ -67,7 +67,7 @@ static void pushfuncname (lua_State *L, lua_Debug *ar) {
     lua_pushfstring(L, "function <%s:%d>", ar->short_src, ar->linedefined);
 }
 
-const char* lmprof_lstrace_getfuncinfo(lua_State *L, lua_Debug *ar) {
+const char* lmprof_lstrace_getfuncinfo (lua_State *L, lua_Debug *ar) {
   const char *funcinfo;
   int top = lua_gettop(L);
   lua_getinfo(L, "Slnt", ar);

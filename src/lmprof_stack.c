@@ -31,28 +31,26 @@ int lmprof_stack_push (lmprof_Stack *s, size_t e) {
 
 int lmprof_stack_equal (lmprof_Stack *s, size_t nmem) {
   if (s->top > -1) {
-    return nmem != s->stack[s->top];
+    return nmem == s->stack[s->top];
   }
-  return 1;
+  return 1;  /* better for error handling */
 }
  
-size_t lmprof_stack_pop (lmprof_Stack *s) {
+int lmprof_stack_pop (lmprof_Stack *s) {
   s->top--;
   if (s->top < -1) {
-    printf("error: Unable to pop from empty stack.\n");
-    exit(1);
+    return 1;
   }
-  return s->stack[s->top + 1];
+  return 0;
 }
 
+/* ATTENTION, this must should never be called with an empty stack */
 size_t lmprof_stack_smart_pop (lmprof_Stack *s, size_t nmem) {
   size_t dmem;
 
   s->top--;
-  if (s->top < -1) {
-    printf("error: Unable to pop from empty stack.\n");
-    exit(1);
-  }
+
+  /* not cheking empty stack, performance purpose */
 
   dmem = nmem - s->stack[s->top + 1];
   if (s->top != 0) {  /* not the last element */
