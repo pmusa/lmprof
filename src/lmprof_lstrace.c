@@ -71,47 +71,17 @@ const char* lmprof_lstrace_getfuncinfo(lua_State *L, lua_Debug *ar) {
   const char *funcinfo;
   int top = lua_gettop(L);
   lua_getinfo(L, "Slnt", ar);
-  lua_pushfstring(L, "\n\t%s:", ar->short_src);
+  lua_pushfstring(L, "%s:", ar->short_src);
   if (ar->currentline > 0)
     lua_pushfstring(L, "%d:", ar->currentline);
   lua_pushliteral(L, " in ");
   pushfuncname(L, ar);
   if (ar->istailcall) 
-    lua_pushliteral(L, "\n\t(...tail calls...)");
+    lua_pushliteral(L, "(...tail calls...)");
   lua_concat(L, lua_gettop(L) - top);
   funcinfo = lua_tostring(L, -1); /* do not pop the string - only after use */
   return funcinfo;
 }
-
-/*
-static const char* get_lstrace (lua_State *L) {
-  lua_Debug ar;
-  int level = 1;
-  const char *lstrace;
-  lua_State *LT = luaL_newstate();
-  int top = lua_gettop(LT);
-
-  lua_pushliteral(LT, "FULL stack traceback:");
-  while (lua_getstack(L, level++, &ar)) {
-      lua_getinfo(L, "Slnt", &ar);
-      lua_pushfstring(LT, "\n\t%s:", ar.short_src);
-      if (ar.currentline > 0)
-        lua_pushfstring(LT, "%d:", ar.currentline);
-      lua_pushliteral(LT, " in ");
-      pushfuncname(LT, &ar);
-      if (ar.istailcall)
-        lua_pushliteral(LT, "\n\t(...tail calls...)");
-      lua_concat(LT, lua_gettop(LT) - top);
-  }
-  lua_concat(LT, lua_gettop(LT) - top);
-  * copy to original state, otherwise it will be lost *
-  lua_pushstring(L, lua_tostring(LT, -1));
-  lua_close(LT);
-  lstrace = lua_tostring(L, -1);
-
-  return lstrace;
-}
-*/
 
 int lmprof_lstrace_write (lua_State *L, const char *filename) {
   lua_Debug ar;
@@ -124,7 +94,7 @@ int lmprof_lstrace_write (lua_State *L, const char *filename) {
   fprintf(f, "%s", "FULL stack traceback:");
 
   while (lua_getstack(L, level++, &ar)) {
-    fprintf(f, "%s", lmprof_lstrace_getfuncinfo(L, &ar));
+    fprintf(f, "\n\t%s", lmprof_lstrace_getfuncinfo(L, &ar));
     lua_pop(L, 1); /* pop string after use */
   }
 

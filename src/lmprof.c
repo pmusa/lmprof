@@ -128,13 +128,13 @@ static void set_lua_alloc(lua_State *L, int remove_finalizer) {
     luaL_error(L, "lmprof was not properly innitialized. Try calling 'start'.");
   }
 
+  /* restore original allocation function */
+  lua_setallocf(L, s->f, s->ud);
+
   if (remove_finalizer) {
     lua_pushnil(L);
     lua_setmetatable(L, -2);
   }
-
-  /* restore original allocation function */
-  lua_setallocf(L, s->f, s->ud);
 }
 
 static void set_lmprof_alloc(lua_State *L, int insert_finalizer) {
@@ -179,11 +179,11 @@ static void hook(lua_State *L, lua_Debug *ar) {
       if (err) {
         lmprof_lstrace_write(L, LMPROF_STACK_DUMP_FILENAME);
         set_lua_alloc(L, TRUE);
+        destroy(L, st, LMPROF_DEFAULT_OUTPUT_FILENAME);
         luaL_error(L, "lmprof stack overflow (current size = %d). We consider \
 your call chain very big. '%s' contains the full stack trace and '%s' contais \
 the memory profile.", LMPROF_STACK_SIZE, LMPROF_STACK_DUMP_FILENAME,
                                          LMPROF_DEFAULT_OUTPUT_FILENAME);
-        destroy(L, st, LMPROF_DEFAULT_OUTPUT_FILENAME);
       }
       break;
     }

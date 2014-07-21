@@ -53,5 +53,7 @@ from: 17 june 2014 to:
 
 - Tratar tail call.
 
+- O que significa "smallpt.lua:87: in function <smallpt.lua:84>(...tail calls...)"
+
 - A chamada de alloc nao possui L!! Como pegar o state da biblioteca?
 

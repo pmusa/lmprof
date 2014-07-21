@@ -3,6 +3,7 @@ test/placo/*
 *.out
 *.o
 *lmprof_default_output.txt
+*lmprof_lstrace.dump
 *.swp
 lixo/*
 test/rollof/*
