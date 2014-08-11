@@ -67,8 +67,8 @@ lmprof.start()
 --sky
 --output_width = 1024/4
 --output_height = 768/4
-output_width = 640/4
-output_height = 480/4
+output_width = 640/16
+output_height = 480/16
 --num_samples = 8
 num_samples = 1
 

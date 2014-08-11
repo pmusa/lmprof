@@ -11,6 +11,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
+#include <stdint.h>
 
 static int findfield (lua_State *L, int objidx, int level) {
   if (level == 0 || !lua_istable(L, -1))
@@ -94,7 +95,12 @@ int lmprof_lstrace_write (lua_State *L, const char *filename) {
   fprintf(f, "%s", "FULL stack traceback:");
 
   while (lua_getstack(L, level++, &ar)) {
-    fprintf(f, "\n\t%s", lmprof_lstrace_getfuncinfo(L, &ar));
+    const char *info;
+    uintptr_t fref;
+    lua_getinfo(L, "f", &ar);
+    fref = (uintptr_t) lua_topointer(L, -1);
+    info = lmprof_lstrace_getfuncinfo(L, &ar);
+    fprintf(f, "\n\t%s - reference: \"%lu\"", info, fref);
     lua_pop(L, 1); /* pop string after use */
   }
 

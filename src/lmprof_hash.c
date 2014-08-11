@@ -76,6 +76,10 @@ lmprof_Hash lmprof_hash_insert (lmprof_Hash *h, uintptr_t function,
 
 void lmprof_hash_update (lmprof_Hash *hash, lmprof_Hash v, size_t size) {
   if (v != NULL) {
+    if (size < 0) { /*  TODO remove for production */
+      printf("ERROR NEGATIVE SIZE IN UPDATE %lu - %lu\n", v->size, size);
+      exit(1);
+    }
     v->count = v->count + 1;
     v->size = v->size + size;
   }

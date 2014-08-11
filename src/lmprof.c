@@ -21,6 +21,11 @@
 #define LMPROF_GET_STATE_INFO(L)	&gst
 #define TRUE				1
 #define FALSE				0
+#define LMPROF_ROOT_FUNCTION_ID         0
+#define LMPROF_UPDATE_ROOT              0
+#define LMPROF_UPDATE_CALL              1
+#define LMPROF_UPDATE_TAIL_CALL         2
+#define LMPROF_SIZE_ZERO                0
 
 
 /*
@@ -46,6 +51,10 @@ typedef struct lmprof_State {
   int ignore_return;
   /* memory counter for each allocation */
   size_t alloc_count;
+  /* flag used to disable alloc_count increment inside lmprof calls */
+  int increment_alloc_count;
+  /* parent address of the tail call */
+  uintptr_t tail_parent;
 } lmprof_State;
 
 /* }================================================================== */
@@ -66,7 +75,8 @@ static int write  (lua_State *L);
 /* LOCAL FUNCTIONS */
 static void destroy(lua_State *L, lmprof_State *st, const char *filename);
 static void create_finalizer(lua_State *L, lua_Alloc f, void *ud);
-static void update(lua_State *L, lmprof_State *st, lua_Debug * far, size_t mem);
+static void update(lua_State *L, lmprof_State *st, lua_Debug * far,
+                                               size_t mem, int update_types);
 
 /* FUNCTIONS USED BY LUA */
 
@@ -92,18 +102,40 @@ static lmprof_State gst;
 ** ===================================================================
 */
 
-static void update (lua_State *L, lmprof_State *st, lua_Debug * far, size_t mem) {
+static void update (lua_State *L, lmprof_State *st, lua_Debug * far,
+                                                size_t mem, int update_type) {
   lmprof_Hash v;
   uintptr_t function;
   uintptr_t parent;
   lua_Debug par;
 
-  lua_getinfo(L, "f", far);
-  function = (uintptr_t) lua_topointer(L, -1);
-
-  lua_getstack(L, 1, &par);
-  lua_getinfo(L, "f", &par);
-  parent = (uintptr_t) lua_topointer(L, -1);
+  switch (update_type) {
+    case LMPROF_UPDATE_ROOT:
+      lua_getinfo(L, "f", far);
+      function = (uintptr_t) lua_topointer(L, -1);
+      parent = 0;
+      break;
+    case LMPROF_UPDATE_CALL:
+      lua_getinfo(L, "f", far);
+      function = (uintptr_t) lua_topointer(L, -1);
+      lua_getstack(L, 1, &par);
+      lua_getinfo(L, "f", &par);
+      parent = (uintptr_t) lua_topointer(L, -1);
+      break;
+    case LMPROF_UPDATE_TAIL_CALL:
+      lua_getstack(L, 1, far);
+      lua_getinfo(L, "f", far);
+      function = (uintptr_t) lua_topointer(L, -1);
+      if (st->tail_parent != 0) {
+        parent = st->tail_parent;
+      } else {
+        lua_getstack(L, 2, &par);
+        lua_getinfo(L, "f", &par);
+        parent = (uintptr_t) lua_topointer(L, -1);
+      }
+      st->tail_parent = function;
+      break;
+  }
 
   v = lmprof_hash_get(st->func_calls, function, parent);
   if (v == NULL) {
@@ -113,7 +145,6 @@ static void update (lua_State *L, lmprof_State *st, lua_Debug * far, size_t mem)
 
   lmprof_hash_update(st->func_calls, v, mem);
 }
-
 
 static void set_lua_alloc (lua_State *L, int remove_finalizer) {
   lmprof_Alloc *s;
@@ -165,15 +196,30 @@ static void set_lmprof_alloc (lua_State *L, int insert_finalizer) {
   }
 }
 
-
 static void hook (lua_State *L, lua_Debug *ar) {
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
+  st->increment_alloc_count = 0;
   if (st->ignore_return) {
     st->ignore_return = 0;
     return;
   }
 
   switch (ar->event) {
+    case LUA_HOOKTAILCALL:
+      if (lmprof_stack_equal(st->mem_stack, st->alloc_count)) {
+        int err = lmprof_stack_pop(st->mem_stack);
+        if (err) {
+          set_lua_alloc(L, TRUE);
+          destroy(L, st, LMPROF_DEFAULT_OUTPUT_FILENAME);
+          luaL_error(L, "unable to pop from empty stack. you did not call stop \
+or called stop in a level 'upper' than start was called.");
+        }
+      } else {
+        size_t mem = lmprof_stack_smart_pop(st->mem_stack, st->alloc_count);
+        update(L, st, ar, mem, LMPROF_UPDATE_TAIL_CALL);
+      }
+      lmprof_stack_push(st->mem_stack, st->alloc_count);
+      break;
     case LUA_HOOKCALL: {
       int err = lmprof_stack_push(st->mem_stack, st->alloc_count);
       if (err) {
@@ -198,11 +244,14 @@ or called stop in a level 'upper' than start was called.");
         }
       } else {
         size_t mem = lmprof_stack_smart_pop(st->mem_stack, st->alloc_count);
-        update(L, st, ar, mem);
+        if(st->tail_parent) {
+          st->tail_parent = 0;
+        }
+        update(L, st, ar, mem, LMPROF_UPDATE_CALL);
       }
-      /* TODO: tailcall case, there is a BUG */
       break;
   }
+  st->increment_alloc_count = 1;
 }
 
 static void destroy (lua_State *L, lmprof_State *st, const char *filename) {
@@ -268,7 +317,9 @@ static void *alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
   } else if (ptr == NULL) {  /* case (malloc): osize holds object type */
     osize = 0;
   }
-  st->alloc_count = st->alloc_count + (nsize - osize);
+  if (nsize > osize && st->increment_alloc_count == 1) {
+    st->alloc_count = st->alloc_count + (nsize - osize);
+  }
   return realloc(ptr, nsize);
 }
 
@@ -281,14 +332,17 @@ static int start (lua_State *L) {
   /* create auxiliary structures and set call/return hook */
   st->alloc_count = 0;
   st->ignore_return = 1;
+  st->increment_alloc_count = 0;
+  st->tail_parent = 0;
   st->mem_stack = lmprof_stack_create();
   st->func_calls = lmprof_hash_create();
 
   /* register calling function into hash */
   lua_getstack(L, 1, &ar);
-  update(L, st, &ar, 0);
+  update(L, st, &ar, LMPROF_SIZE_ZERO, LMPROF_UPDATE_ROOT);
 
   lua_sethook(L, hook, LUA_MASKCALL | LUA_MASKRET, 0);
+  st->increment_alloc_count = 1;
   return 0;
 }
 
@@ -316,6 +370,7 @@ static int resume (lua_State *L) {
   set_lmprof_alloc(L, FALSE);
   st->ignore_return = 1;
   lua_sethook(L, hook, LUA_MASKCALL | LUA_MASKRET, 0);
+  st->increment_alloc_count = 1;
   return 0;
 }
 

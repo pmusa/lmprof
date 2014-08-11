@@ -53,7 +53,7 @@ size_t lmprof_stack_smart_pop (lmprof_Stack *s, size_t nmem) {
   /* not cheking empty stack, performance purpose */
 
   dmem = nmem - s->stack[s->top + 1];
-  if (s->top != 0) {  /* not the last element */
+  if (s->top >= 0) {
     /* increment fix by the present diff */
     s->fix[s->top] = s->fix[s->top] + dmem;
   }

@@ -61,3 +61,13 @@ from: 17 june 2014 to:
 nunca sao chamados?
 
 - Quantas colisoes?
+
+- Qual funcao de hash?
+
+===============================================================================
+
+- porque uma tail call não possui nome durante a tail call, mas em outros casos possui?
+
+- quando a biblioteca dah um erro e termina, as funcoes que nao foram desempilhadas nao sao cadastradas. Sua referencias podem ser encontradas no dump.
+
+- object shinkring not being considered.

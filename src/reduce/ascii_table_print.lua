@@ -19,12 +19,12 @@ function flat_print(t, max)
 
   local sc = string.rep(" ", cs - ctla)
   local tl = [[
-   %%   cumulative    self  %s         self     total
-  mem     mem        mem   %scalls  mem/call  mem/call  name]]
+   %%   cumulative    self  %s      cumulative    self
+  mem     mem        mem   %scalls   mem/call   mem/call  name]]
 --[[
  __.__  ___._ kb   ___._ kb    ???  ___._ kb  ___._ kb  ???
 --]]
-  local fl = "%6.2f  %s   %s  %"..cs.."d  %s  %s  %s"
+  local fl = "%6.2f  %s   %s  %"..cs.."d  %s   %s  %s"
 
   print(string.format(tl, sc, sc))
 

@@ -8,7 +8,7 @@ LIB_NAME=lmprof
 
 CC = gcc
 CFLAGS = -g -Wall -ansi -pedantic -fPIC -shared
-CFLAGS = -g -Wall -pedantic -fPIC -shared
+#CFLAGS = -g -pedantic -fPIC -shared
 
 LUA_DIR = /usr/include/lua5.2
 LUA_CFLAGS = -I$(LUA_DIR)
