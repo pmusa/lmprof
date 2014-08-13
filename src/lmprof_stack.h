@@ -10,6 +10,8 @@ void          lmprof_stack_destroy   (lmprof_Stack* s);
 int           lmprof_stack_push      (lmprof_Stack *s, size_t element);
 int           lmprof_stack_equal     (lmprof_Stack *s, size_t nmem);
 int           lmprof_stack_pop       (lmprof_Stack *s);
-size_t        lmprof_stack_smart_pop (lmprof_Stack *s, size_t nmem);
+size_t        lmprof_stack_smart_pop (lmprof_Stack *s, size_t nmem, size_t *total_mem);
+void lmprof_print_stack(lmprof_Stack *s);
+
  
 #endif

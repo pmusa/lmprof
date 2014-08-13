@@ -18,7 +18,8 @@ typedef struct lmprof_FHash {
   uintptr_t parent;
   char *name;
   unsigned int count;
-  size_t size;
+  size_t self_size;
+  size_t cum_size;
   struct lmprof_FHash *next;
 } lmprof_FHash;
 
@@ -68,20 +69,22 @@ lmprof_Hash lmprof_hash_insert (lmprof_Hash *h, uintptr_t function,
   val->name = (char *) malloc (strlen(name) + 1);
   strcpy(val->name, name);
   val->count = 0;
-  val->size = 0;
+  val->self_size = 0;
+  val->cum_size = 0;
   /* val->next = NULL; inserting in front, no need for that */
   fhash_insert(h, function, parent, val);
   return val;
 }
 
-void lmprof_hash_update (lmprof_Hash *hash, lmprof_Hash v, size_t size) {
+void lmprof_hash_update (lmprof_Hash *hash, lmprof_Hash v, size_t self_size, size_t cum_size) {
   if (v != NULL) {
-    if (size < 0) { /*  TODO remove for production */
-      printf("ERROR NEGATIVE SIZE IN UPDATE %lu - %lu\n", v->size, size);
+    if (self_size < 0) { /*  TODO remove for production */
+      printf("ERROR NEGATIVE SIZE IN UPDATE %lu - %lu\n", v->self_size, self_size);
       exit(1);
     }
     v->count = v->count + 1;
-    v->size = v->size + size;
+    v->self_size = v->self_size + self_size;
+    v->cum_size = v->cum_size + cum_size;
   }
 }
 
@@ -126,7 +129,8 @@ void lmprof_hash_print (lmprof_Hash *h, const char *filename) {
       fprintf(f, "    parent = \"%lu\",\n", fh->parent);
       fprintf(f, "    name = \"%s\",\n", fh->name);
       fprintf(f, "    calls = %d,\n", fh->count);
-      fprintf(f, "    mem_self = %lu,\n", fh->size);
+      fprintf(f, "    mem_self = %lu,\n", fh->self_size);
+      fprintf(f, "    mem_cum = %lu,\n", fh->cum_size);
       fprintf(f, "  },\n");
       fh = fh->next;
     }
