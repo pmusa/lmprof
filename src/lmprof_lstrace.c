@@ -50,7 +50,6 @@ static int pushglobalfuncname (lua_State *L, lua_Debug *ar) {
     return 0;
   }
 }
-
 static void pushfuncname (lua_State *L, lua_Debug *ar) {
   if (*ar->namewhat != '\0')  /* is there a name? */
     lua_pushfstring(L, "function " LUA_QS, ar->name);
@@ -72,6 +71,37 @@ const char* lmprof_lstrace_getfuncinfo (lua_State *L, lua_Debug *ar) {
   const char *funcinfo;
   int top = lua_gettop(L);
   lua_getinfo(L, "Slnt", ar);
+  if (*ar->namewhat != '\0') { /* is there a name? */
+    lua_pushstring(L, ar->name);
+    if (ar->linedefined > 0) {
+      lua_pushfstring(L, " (%s:%d)", ar->short_src, ar->linedefined);
+    } else {
+      lua_pushfstring(L, " %s", ar->short_src);
+    }
+  } else if (*ar->what == 'm') { /* main? */
+    lua_pushliteral(L, "main chunk");
+    lua_pushfstring(L, " (%s)", ar->short_src);
+  } else if (*ar->what == 'C') {
+    if (pushglobalfuncname(L, ar)) {
+      lua_pushstring(L, lua_tostring(L, -1));
+      lua_remove(L, -2);  /* remove name */
+    } else {
+      lua_pushliteral(L, "?");
+    }
+    lua_pushfstring(L, " %s", ar->short_src);
+  } else {
+    lua_pushliteral(L, "?");
+    lua_pushfstring(L, " (%s:%d)", ar->short_src, ar->linedefined,ar->currentline);
+  }
+  lua_concat(L, lua_gettop(L) - top);
+  funcinfo = lua_tostring(L, -1); /* do not pop the string - only after use */
+  return funcinfo;
+}
+
+const char* lmprof_lstrace_gettracefuncinfo (lua_State *L, lua_Debug *ar) {
+  const char *funcinfo;
+  int top = lua_gettop(L);
+  lua_getinfo(L, "Slnt", ar);
   lua_pushfstring(L, "%s:", ar->short_src);
   if (ar->currentline > 0)
     lua_pushfstring(L, "%d:", ar->currentline);
@@ -83,6 +113,7 @@ const char* lmprof_lstrace_getfuncinfo (lua_State *L, lua_Debug *ar) {
   funcinfo = lua_tostring(L, -1); /* do not pop the string - only after use */
   return funcinfo;
 }
+
 
 int lmprof_lstrace_write (lua_State *L, const char *filename) {
   lua_Debug ar;
@@ -99,7 +130,7 @@ int lmprof_lstrace_write (lua_State *L, const char *filename) {
     uintptr_t fref;
     lua_getinfo(L, "f", &ar);
     fref = (uintptr_t) lua_topointer(L, -1);
-    info = lmprof_lstrace_getfuncinfo(L, &ar);
+    info = lmprof_lstrace_gettracefuncinfo(L, &ar);
     fprintf(f, "\n\t%s - reference: \"%lu\"", info, fref);
     lua_pop(L, 1); /* pop string after use */
   }

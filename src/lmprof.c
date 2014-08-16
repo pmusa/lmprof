@@ -15,7 +15,7 @@
 #include "lmprof_hash.h"
 #include "lmprof_lstrace.h"
 
-#define LMPROF_DEFAULT_OUTPUT_FILENAME	"lmprof_default_output.txt"
+#define LMPROF_DEFAULT_OUTPUT_FILENAME	"lmprof_default_output.lua"
 #define LMPROF_STACK_DUMP_FILENAME	"lmprof_lstrace.dump"
 #define LMPROF_UD_ALLOC			"lmprof_alloc"
 #define LMPROF_GET_STATE_INFO(L)	&gst
