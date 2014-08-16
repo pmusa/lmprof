@@ -1,9 +1,9 @@
-test/placo/*
+lixo/*
+test/out/*
+benchmark/*
 *.so
 *.out
 *.o
-*lmprof_default_output.txt
+*lmprof_default_output.lua
 *lmprof_lstrace.dump
 *.swp
-lixo/*
-test/rollof/*

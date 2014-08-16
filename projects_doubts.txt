@@ -71,3 +71,8 @@ nunca sao chamados?
 - quando a biblioteca dah um erro e termina, as funcoes que nao foram desempilhadas nao sao cadastradas. Sua referencias podem ser encontradas no dump.
 
 - object shinkring not being considered.
+
+- as vezes retorna _G.tostring, as vezes tostring
+
+- TODO: handle multiple states correctly.
+
