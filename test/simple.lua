@@ -3,7 +3,7 @@ local lmprof = require"lmprof"
 lmprof.start()
 
 local g = function(f) f() end
-local f1 = function() print("oi") end
+local f1 = function() return 10 end
 local f2 = function()
   local s = "test"
   local t = {}
@@ -21,6 +21,7 @@ local f3 = function()
 end
 
 g(f1)
+g(f2)
 g(f2)
 
 lmprof.stop()

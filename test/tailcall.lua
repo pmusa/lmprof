@@ -9,7 +9,7 @@ end
 
 local function c()
   local t2 = {}
-  for i=1,10 do t2[i] = i*i end
+  for i=1,100 do t2[i] = i*i end
   return d(t2)
 end
 

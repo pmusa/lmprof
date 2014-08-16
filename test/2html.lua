@@ -58,9 +58,9 @@ end
 
 ---------------------------------------------------------------
 
-local function compose (f,g)
-  assert(f and g)
-  return function (s) return g(f(s)) end
+local function compose (ff,g)
+  assert(ff and g)
+  return function (s) return g(ff(s)) end
 end
 
 local function concat (f, g)
@@ -459,7 +459,9 @@ end
 ---------------------------------------------------------------------
 
 -- read whole book
-t = io.read"*a"
+local f = io.open("resources/2html.in")
+t = f:read("*a")
+f:close()
 
 t = string.gsub(t, "[<>&\128-\255]",
   {["<"] = "&lt;",

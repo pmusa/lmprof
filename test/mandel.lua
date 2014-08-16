@@ -1,4 +1,7 @@
-dofile("complex.lua")
+local lmprof = require"lmprof"
+lmprof.start()
+
+dofile("resources/complex.lua")
 
 xmin=-2		xmax=2		ymin=-2		ymax=2
 --sky
@@ -37,3 +40,5 @@ for i=1,N do
   print(level(x,y))
  end
 end
+
+lmprof.stop()
