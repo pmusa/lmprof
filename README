@@ -25,7 +25,7 @@ local lmprof = require"lmprof"
 -- starts the memory monitor
 lmprof.start()
 
--- stops the memory monitor and write to a file in lua table format the number
+-- stops the memory monitor and write to a file in Lua table format the number
 -- of calls, the memory allocated only by the function and the memory allocated
 -- by the function and its children for all the pairs (function, parent) that
 -- allocated memory.
@@ -38,7 +38,7 @@ To see the report of the monitored program there are a few options.
 
 $> lua text.lua <flat | call | all> <lmprof_output_file_location> [size]
 
-flat profile: A summary of function allocations ordered by the ammount of data
+flat profile: A summary of function allocations ordered by the amount of data
 allocated by each function alone.
 
 call-graph profile: A detailed report by function with parents and children

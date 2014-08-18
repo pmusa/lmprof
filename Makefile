@@ -1,9 +1,3 @@
-#
-# Author: Pablo Musa
-# Creation Date: may 19 2014
-# Last Modification: ago 15 2014
-# See Copyright Notice in COPYRIGHT
-#
 CC = gcc
 CFLAGS = -g -Wall -ansi -pedantic -fPIC -shared
 
