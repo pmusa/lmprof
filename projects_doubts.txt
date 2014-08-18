@@ -27,7 +27,7 @@ Esse primeiro cara sempre acontece? posso ignorar na marra?
 -> SOMAR TUDO APENAS NO FINAL. SEMPRE DIMINUIR O PESO DA LIB NO MOMENTO DA EXECUCAO.
 
 ===============================================================================
-from: 15 june 2014 to: 17 june 2014
+from: 15 july 2014 to: 17 july 2014
 
 - lua_newuserdata deve ser liberada?
 
@@ -47,7 +47,7 @@ from: 15 june 2014 to: 17 june 2014
   => Bom, mas precisa ser medido. Eh mais preciso!!
 
 ===============================================================================
-from: 17 june 2014 to:
+from: 17 july 2014 to: 24 july 2014
 
 - lua_newuserdata deve ser liberada?
 
@@ -65,6 +65,7 @@ nunca sao chamados?
 - Qual funcao de hash?
 
 ===============================================================================
+from: 24 july 2014 to: 13 august 2014
 
 - porque uma tail call não possui nome durante a tail call, mas em outros casos possui?
 

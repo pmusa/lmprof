@@ -1,0 +1,60 @@
+lmprof
+==============
+
+A Memory Profiler for the Lua language
+
+* Author: Pablo Musa
+* Creation Date: may 21 2014
+* Last Modification: aug 18 2014
+* See Copyright Notice in LICENSE
+
+lmprof is a library for the Lua language (version 5.2) that collects
+information about the memory usage of a program throughout its execution and
+then analyze the collected data to generate reports.
+The memory use of the program using our library can be seen in a flat
+or in call-graph profile.
+
+Read INSTALL to see the library dependencies.
+
+Use the following command to load the library into a local variable:
+local lmprof = require"lmprof"
+
+*
+* lmprof monitor API
+*
+-- starts the memory monitor
+lmprof.start()
+
+-- stops the memory monitor and write to a file in lua table format the number
+-- of calls, the memory allocated only by the function and the memory allocated
+-- by the function and its children for all the pairs (function, parent) that
+-- allocated memory.
+lmprof.stop([output_file_name])
+
+*
+* lmprof reduce
+*
+To see the report of the monitored program there are a few options.
+
+$> lua text.lua <flat | call | all> <lmprof_output_file_location> [size]
+
+flat profile: A summary of function allocations ordered by the ammount of data
+allocated by each function alone.
+
+call-graph profile: A detailed report by function with parents and children
+information.
+
+all: both of the above profiles
+
+The optional size parameter limits the number of functions of the output.
+
+*
+* Some Considerations
+*
+Calling the start function twice raises an error.
+
+Not calling the stop function will cause an error.
+
+The library monitors only the interval between start and stop. Memory operations
+done before the start call, or after the stop call are not counted.
+

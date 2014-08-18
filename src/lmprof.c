@@ -1,11 +1,3 @@
-/*
-** Author: Pablo Musa
-** Creation Date: may 19 2014
-** Last Modification: ago 15 2014
-** See Copyright Notice in COPYRIGHT
-**
-*/
-
 #include <stdlib.h>
 #include <lua.h>
 #include <lauxlib.h>
@@ -66,21 +58,23 @@ typedef struct lmprof_State {
 */
 
 /* FUNCTIONS REGISTERED TO BE USED */
+
 static int start  (lua_State *L);
 static int stop   (lua_State *L);
-static int pause  (lua_State *L);
-static int resume (lua_State *L);
-static int write  (lua_State *L);
+
 
 /* LOCAL FUNCTIONS */
+
 static void destroy(lua_State *L, lmprof_State *st, const char *filename);
 static void create_finalizer(lua_State *L, lua_Alloc f, void *ud);
 static void update(lua_State *L, lmprof_State *st, lua_Debug * far,
                                size_t mem, size_t total_mem, int update_types);
+static void set_lua_alloc (lua_State *L, int remove_finalizer);
+static void set_lmprof_alloc (lua_State *L, int insert_finalizer);
 
 /* FUNCTIONS USED BY LUA */
 
-/* allocation function used by Lua when luamemprofiler is used */
+/* allocation function used by Lua when lmprof is used */
 static int   finalize (lua_State *L);
 static void* alloc    (void *ud, void *ptr, size_t osize, size_t nsize);
 static void  hook     (lua_State *L, lua_Debug *ar);
@@ -217,17 +211,9 @@ or called stop in a level 'upper' than start was called.");
       } else {
         size_t total_mem;
         size_t self_mem = lmprof_stack_smart_pop(st->mem_stack, st->alloc_count, &total_mem);
-//lua_getstack(L, 0, ar);
-//lua_getinfo(L, "f", ar);
-//const char *name = lmprof_lstrace_getfuncinfo(L, ar);
-//printf("TSPOP %s - %d\n", name, st->alloc_count);
         update(L, st, ar, self_mem, total_mem, LMPROF_UPDATE_TAIL_CALL);
       }
       lmprof_stack_push(st->mem_stack, st->alloc_count);
-//lua_getstack(L, 0, ar);
-//lua_getinfo(L, "f", ar);
-//const char *name = lmprof_lstrace_getfuncinfo(L, ar);
-//printf("TPUSH %s - %d\n", name, st->alloc_count);
       break;
     case LUA_HOOKCALL: {
       int err = lmprof_stack_push(st->mem_stack, st->alloc_count);
@@ -240,18 +226,10 @@ your call chain very big. '%s' contains the full stack trace and '%s' contais \
 the memory profile.", LMPROF_STACK_SIZE, LMPROF_STACK_DUMP_FILENAME,
                                          LMPROF_DEFAULT_OUTPUT_FILENAME);
       }
-//lua_getstack(L, 0, ar);
-//lua_getinfo(L, "f", ar);
-//const char *name = lmprof_lstrace_getfuncinfo(L, ar);
-//printf("PUSH %s - %d\n", name, st->alloc_count);
       break;
     }
     case LUA_HOOKRET:
       if (lmprof_stack_equal(st->mem_stack, st->alloc_count)) {
-//lua_getstack(L, 0, ar);
-//lua_getinfo(L, "f", ar);
-//const char *name = lmprof_lstrace_getfuncinfo(L, ar);
-//printf("POP %s - %d\n", name, st->alloc_count);
         int err = lmprof_stack_pop(st->mem_stack);
         if (err) {
           set_lua_alloc(L, TRUE);
@@ -262,10 +240,6 @@ or called stop in a level 'upper' than start was called.");
       } else {
         size_t total_mem;
         size_t self_mem = lmprof_stack_smart_pop(st->mem_stack, st->alloc_count, &total_mem);
-//lua_getstack(L, 0, ar);
-//lua_getinfo(L, "f", ar);
-//const char *name = lmprof_lstrace_getfuncinfo(L, ar);
-//printf("TPOP %s - %d\n", name, st->alloc_count);
         if(st->tail_parent) {
           st->tail_parent = 0;
         }
@@ -347,7 +321,6 @@ static void *alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
 
 static int start (lua_State *L) {
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
-  lua_Debug ar;
 
   set_lmprof_alloc(L, TRUE);
 
@@ -390,35 +363,10 @@ static int stop (lua_State *L) {
   return 0;
 }
 
-static int pause (lua_State *L) {
-  set_lua_alloc(L, FALSE);
-  lua_sethook(L, hook, 0, 0);
-  return 0;
-}
-
-static int resume (lua_State *L) {
-  lmprof_State *st = LMPROF_GET_STATE_INFO(L);
-  set_lmprof_alloc(L, FALSE);
-  st->ignore_return = 1;
-  lua_sethook(L, hook, LUA_MASKCALL | LUA_MASKRET, 0);
-  st->increment_alloc_count = 1;
-  return 0;
-}
-
-static int write (lua_State *L) {
-  const char *filename = luaL_checkstring(L, 1);
-  lmprof_State *st = LMPROF_GET_STATE_INFO(L);
-  lmprof_hash_print(st->func_calls, filename);
-  return 0;
-}
-
 /* luamemprofiler function registration array */
 static const luaL_Reg lmprof[] = {
   { "start",  start},
   { "stop",   stop},
-  { "pause",  pause},
-  { "resume", resume},
-  { "write",  write},
   { NULL, NULL }
 };
 

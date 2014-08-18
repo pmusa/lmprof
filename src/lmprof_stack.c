@@ -44,7 +44,7 @@ int lmprof_stack_pop (lmprof_Stack *s) {
   return 0;
 }
 
-/* ATTENTION, this must should never be called with an empty stack */
+/* ATTENTION, this function must should never be called with an empty stack */
 size_t lmprof_stack_smart_pop (lmprof_Stack *s, size_t nmem, size_t *tot_mem) {
   s->top--;
 
@@ -60,9 +60,3 @@ size_t lmprof_stack_smart_pop (lmprof_Stack *s, size_t nmem, size_t *tot_mem) {
   return *tot_mem - s->fix[s->top + 1];
 }
 
-void lmprof_print_stack(lmprof_Stack *s) {
-  int i;
-  for (i=s->top; i >= 0; i--) {
-    printf("%10lu\t%10lu\n",s->stack[i], s->fix[i]);
-  }
-}

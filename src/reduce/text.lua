@@ -1,26 +1,26 @@
 if not arg[2] then
-  print("usage: "..arg[0].." <flat | call | all> <lmprof_output_file_location> [size]")
-  return
+  print("usage: " .. arg[0]
+               .. " <flat | call | all> <lmprof_output_file_location> [size]")
+  os.exit(1)
 end
 
 local prof_type = arg[1]
 if not (prof_type == "flat" or prof_type == "call" or prof_type == "all") then
   print("invalid profile type. profile_type must be <flat | call | all>")
-  return
+  os.exit(1)
 end
 
 local prof_filename = arg[2]
 local ok, call_table = pcall(dofile, prof_filename)
 if not ok then
   print(call_table)
-  return
+  os.exit(1)
 end
 
 local size = arg[3]
-local reduce = require("reduce")
+local reduce = require("lmprof.reduce")
 local func_table = reduce(call_table)
-local lmprof_print = require("ascii_print")
-
+local lmprof_print = require("lmprof.ascii_print")
 
 if prof_type == "all" then
   lmprof_print.flat_print(func_table, size)

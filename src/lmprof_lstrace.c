@@ -1,11 +1,3 @@
-/*
-** Author: Pablo Musa
-** Creation Date: jul 20 2014
-** Last Modification: ago 15 2014
-** See Copyright Notice in COPYRIGHT
-**
-*/
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <lua.h>
@@ -50,6 +42,7 @@ static int pushglobalfuncname (lua_State *L, lua_Debug *ar) {
     return 0;
   }
 }
+
 static void pushfuncname (lua_State *L, lua_Debug *ar) {
   if (*ar->namewhat != '\0')  /* is there a name? */
     lua_pushfstring(L, "function " LUA_QS, ar->name);
@@ -91,7 +84,8 @@ const char* lmprof_lstrace_getfuncinfo (lua_State *L, lua_Debug *ar) {
     lua_pushfstring(L, " %s", ar->short_src);
   } else {
     lua_pushliteral(L, "?");
-    lua_pushfstring(L, " (%s:%d)", ar->short_src, ar->linedefined,ar->currentline);
+    lua_pushfstring(L, " (%s:%d)", ar->short_src, ar->linedefined,
+                                                  ar->currentline);
   }
   lua_concat(L, lua_gettop(L) - top);
   funcinfo = lua_tostring(L, -1); /* do not pop the string - only after use */

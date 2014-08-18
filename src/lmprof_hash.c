@@ -76,12 +76,9 @@ lmprof_Hash lmprof_hash_insert (lmprof_Hash *h, uintptr_t function,
   return val;
 }
 
-void lmprof_hash_update (lmprof_Hash *hash, lmprof_Hash v, size_t self_size, size_t cum_size) {
+void lmprof_hash_update (lmprof_Hash *hash, lmprof_Hash v, size_t self_size,
+                                                           size_t cum_size) {
   if (v != NULL) {
-    if (self_size < 0) { /*  TODO remove for production */
-      printf("ERROR NEGATIVE SIZE IN UPDATE %lu - %lu\n", v->self_size, self_size);
-      exit(1);
-    }
     v->count = v->count + 1;
     v->self_size = v->self_size + self_size;
     v->cum_size = v->cum_size + cum_size;
@@ -89,7 +86,7 @@ void lmprof_hash_update (lmprof_Hash *hash, lmprof_Hash v, size_t self_size, siz
 }
 
 lmprof_Hash* lmprof_hash_create (void) {
-  lmprof_Hash* h = (lmprof_Hash*) malloc (LMPROF_HASH_SIZE * sizeof(lmprof_Hash));
+  lmprof_Hash* h = (lmprof_Hash*) malloc (LMPROF_HASH_SIZE*sizeof(lmprof_Hash));
   int i;
   for (i = 0; i < LMPROF_HASH_SIZE; i++) {
     h[i] = NULL;

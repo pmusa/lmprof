@@ -1,4 +1,4 @@
-local lt2oa = require("lt2oa")
+local lt2oa = require("lmprof.lt2oa")
 
 
 local UNITS = {"K", "M", "G", "T", "P", "E", "Z", "Y"}
@@ -35,14 +35,18 @@ local function n2i (n)
   return s
 end
 
-local function XXX(ftarray, max, func_table)
+-- max len and memory size format table
+local function mlmsft(ftarray, max, func_table)
   -- calculate max len for each field
-  local maxlen = {calls = 5, mem_self = 1, mem_cum = 1, mpc_self = 1, mpc_cum = 1, name = 4}
+  local maxlen = {
+    calls = 5, mem_self = 1, mem_cum = 1, mpc_self = 1, mpc_cum = 1, name = 4,
+  }
   for i,ft in ipairs(ftarray) do
     if max and i == max+1 then break end
     for k,mv in pairs(maxlen) do
       -- if number, use only integer part
-      local l = string.len(type(ft[k]) == "number" and math.floor(ft[k]) or ft[k])
+      local l = type(ft[k]) == "number" and math.floor(ft[k]) or ft[k]
+      l = string.len(l)
       maxlen[k] = l > mv and l or maxlen[k]
     end
 
@@ -53,7 +57,8 @@ local function XXX(ftarray, max, func_table)
           if not pt[k] then
             pt = func_table[pref]
           end
-          local l = string.len(type(pt[k]) == "number" and math.floor(pt[k]) or pt[k])
+          local l = type(pt[k]) == "number" and math.floor(pt[k]) or pt[k]
+          l = string.len(l)
           maxlen[k] = l > mv and l or maxlen[k]
         end
       end
@@ -73,7 +78,7 @@ function flat_print(func_table, max)
   local ftarray = lt2oa(func_table)
 
   -- get maxlen for numeric fields and format for memory size fields
-  local maxlen, msft = XXX(ftarray, max)
+  local maxlen, msft = mlmsft(ftarray, max)
 
   local ctla = 3  -- calls title line ajust
   local sc = string.rep(" ", maxlen.calls - ctla)
@@ -101,7 +106,7 @@ local function call_graph_print(func_table, max)
   local ftarray = lt2oa(func_table)
 
   -- get maxlen for numeric fields and format for memory size fields
-  local maxlen, msft = XXX(ftarray, max, func_table)
+  local maxlen, msft = mlmsft(ftarray, max, func_table)
 
   -- [[ print header ]] --
   local header = {

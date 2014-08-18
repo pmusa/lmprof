@@ -3,12 +3,11 @@ local fn2 = arg[2]
 
 if not fn2 then
   print("usage: " .. arg[0] .. " <file1> <file2>")
-  os.exit(1)
+  os.exit(99)
 end
 
 local reduce = require"lmprof.reduce"
 local lt2oa = require"lmprof.lt2oa"
-
 
 ft1 = lt2oa(reduce(dofile(fn1)))
 ft2 = lt2oa(reduce(dofile(fn2)))

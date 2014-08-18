@@ -1,0 +1,16 @@
+INSTALL INSTRUCTIONS FOR LINUX:
+
+lmprof has only one dependency:
+
+Lua 5.2
+http://www.lua.org/work/
+Download and Install (make, make install should do it).
+Ubuntu:
+sudo apt-get install liblua5.2-dev
+
+In lmprof root folder open the Makefile and edit the variables LUA_DIR and
+LUA_LIB to fit your intallation. Then, run:
+make
+./scripts/full_test.sh
+sudo make install
+make clean
