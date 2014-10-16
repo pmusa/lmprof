@@ -1,5 +1,5 @@
 local lmprof = require"lmprof"
-lmprof.start(...)
+lmprof.start()
 
 function eval(str)
   local tab = {}
@@ -16,6 +16,3 @@ function eval(str)
 end
 
 for k,v in pairs(eval("10*x^4 - 5*x^3 + 7*x^2 - 3*x + 5")) do ; end
-
-lmprof.stop()
-

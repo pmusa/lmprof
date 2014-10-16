@@ -516,5 +516,3 @@ t = nopara(t)
 t = string.gsub(t, "</p>", "")
 
 io.write(header, t, footer)
-
-lmprof.stop()

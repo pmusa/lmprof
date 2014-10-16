@@ -77,3 +77,13 @@ from: 24 july 2014 to: 13 august 2014
 
 - TODO: handle multiple states correctly.
 
+===============================================================================
+
+- coroutines dont use multi-state
+
+- How to output multi-state?
+  .   1) use State pointer in the name
+  . * 2) let output_name to be used in lmprof.start and let programmer define names (chosen)
+
+- getallocf é mais caro ou barato do que pegar um valor da tabela.
+- tratamento de string (-- e ") no nome da função.

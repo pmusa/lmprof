@@ -1,0 +1,42 @@
+return {
+  ["2033795220363952"] = {
+    func = "20337952",
+    parent = "20363952",
+    name = "eval (eval.lua:4)",
+    calls = 1,
+    mem_self = 637,
+    mem_cum = 4452,
+  },
+  ["429552020337952"] = {
+    func = "4295520",
+    parent = "20337952",
+    name = "loadstring [C]",
+    calls = 1,
+    mem_self = 3735,
+    mem_cum = 3735,
+  },
+  ["429494420337952"] = {
+    func = "4294944",
+    parent = "20337952",
+    name = "pcall [C]",
+    calls = 1,
+    mem_self = 80,
+    mem_cum = 80,
+  },
+  ["203639524212496"] = {
+    func = "20363952",
+    parent = "4212496",
+    name = "main chunk (eval.lua)",
+    calls = 1,
+    mem_self = 0,
+    mem_cum = 4452,
+  },
+  ["42124960"] = {
+    func = "4212496",
+    parent = "0",
+    name = "? [C]",
+    calls = 1,
+    mem_self = 0,
+    mem_cum = 4452,
+  },
+}

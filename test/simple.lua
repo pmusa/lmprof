@@ -24,7 +24,7 @@ g(f1)
 g(f2)
 g(f2)
 
-lmprof.stop()
+lmprof.stop("lmprof_simple.lua")
 
 g(f1)
 g(f3)

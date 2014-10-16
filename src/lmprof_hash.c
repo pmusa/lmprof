@@ -63,14 +63,30 @@ lmprof_Hash lmprof_hash_get (lmprof_Hash *h, uintptr_t function,
 
 lmprof_Hash lmprof_hash_insert (lmprof_Hash *h, uintptr_t function,
                                 uintptr_t parent, const char *name) {
+  int i, namelen;
+
   lmprof_FHash *val = (lmprof_FHash *) malloc (sizeof(lmprof_FHash));
   val->function = function;
   val->parent = parent;
-  val->name = (char *) malloc (strlen(name) + 1);
-  strcpy(val->name, name);
   val->count = 0;
   val->self_size = 0;
   val->cum_size = 0;
+
+  /* copy string name from Lua removing dangerous (" --) char */
+  /* multi-state beginning with more than two -- will have problems */
+  namelen = strlen(name);
+  val->name = (char *) malloc (namelen + 1);
+  for(i=0; i < namelen; i++) {
+    if (name[i] == '"') {
+      val->name[i] = '\'';
+    } else if (name[i] == '-' && name[i+1] == '-') {
+      val->name[i] = ' ';
+    } else {
+      val->name[i] = name[i];
+    }
+  }
+  val->name[i] = '\0';
+
   /* val->next = NULL; inserting in front, no need for that */
   fhash_insert(h, function, parent, val);
   return val;

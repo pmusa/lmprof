@@ -29,4 +29,4 @@ end
 
 a()
 
-lmprof.stop()
+lmprof.stop("lmprof_tailcall.lua")

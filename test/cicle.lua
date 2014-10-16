@@ -32,5 +32,4 @@ a.x[5] = x
 b = {c = {a}}
 a.x = b
 cicle(a)
-
 lmprof.stop()

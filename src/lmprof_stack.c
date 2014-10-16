@@ -35,6 +35,10 @@ int lmprof_stack_equal (lmprof_Stack *s, size_t nmem) {
   }
   return 1;  /* better for error handling */
 }
+
+int lmprof_stack_size(lmprof_Stack *s) {
+  return s->top+1;
+}
  
 int lmprof_stack_pop (lmprof_Stack *s) {
   s->top--;
@@ -44,7 +48,7 @@ int lmprof_stack_pop (lmprof_Stack *s) {
   return 0;
 }
 
-/* ATTENTION, this function must should never be called with an empty stack */
+/* ATTENTION, this function must never be called with an empty stack */
 size_t lmprof_stack_smart_pop (lmprof_Stack *s, size_t nmem, size_t *tot_mem) {
   s->top--;
 

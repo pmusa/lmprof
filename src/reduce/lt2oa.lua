@@ -1,3 +1,5 @@
+-- lt2oa: lmprof table to ordered array
+
 local function lmprof_sort(a, b)
   if a.mem_self == b.mem_self then
     if a.mem_cum == b.mem_cum then

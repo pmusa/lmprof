@@ -1,5 +1,5 @@
 local lmprof = require"lmprof"
-lmprof.start(...)
+lmprof.start()
 
 function allwords ()
 	local line = io.read()  -- current line
@@ -47,4 +47,3 @@ end
 local old_in = io.input()
 word_count("resources/wfc.in", 10)
 io.input(old_in)
-lmprof.stop()

@@ -40,5 +40,3 @@ for i=1,N do
   print(level(x,y))
  end
 end
-
-lmprof.stop()

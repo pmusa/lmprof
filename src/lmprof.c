@@ -2,6 +2,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
+#include <string.h>
 
 #include "lmprof_stack.h"
 #include "lmprof_hash.h"
@@ -10,7 +11,7 @@
 #define LMPROF_DEFAULT_OUTPUT_FILENAME	"lmprof_default_output.lua"
 #define LMPROF_STACK_DUMP_FILENAME	"lmprof_lstrace.dump"
 #define LMPROF_UD_ALLOC			"lmprof_alloc"
-#define LMPROF_GET_STATE_INFO(L)	&gst
+#define LMPROF_GET_STATE_INFO(L)	get_lmprof_state(L)
 #define TRUE				1
 #define FALSE				0
 #define LMPROF_ROOT_FUNCTION_ID         0
@@ -18,6 +19,7 @@
 #define LMPROF_UPDATE_CALL              1
 #define LMPROF_UPDATE_TAIL_CALL         2
 #define LMPROF_SIZE_ZERO                0
+#define LMPROF_STOP_QUEUE_SIZE		3
 
 
 /*
@@ -34,6 +36,10 @@ typedef struct lmprof_Alloc {
 
 /* Structure that keeps allocation info about the running State */
 typedef struct lmprof_State {
+  /* structure that keeps previous Lua allocation function and ud */
+  lmprof_Alloc la;
+  /* name of the output file */
+  char *output_filename;
   /* stack containing memory use when entering a function */
   lmprof_Stack *mem_stack;
   /* hash table containning information of each function call that generated
@@ -65,19 +71,22 @@ static int stop   (lua_State *L);
 
 /* LOCAL FUNCTIONS */
 
-static void destroy(lua_State *L, lmprof_State *st, const char *filename);
-static void create_finalizer(lua_State *L, lua_Alloc f, void *ud);
-static void update(lua_State *L, lmprof_State *st, lua_Debug * far,
-                               size_t mem, size_t total_mem, int update_types);
-static void set_lua_alloc (lua_State *L, int remove_finalizer);
-static void set_lmprof_alloc (lua_State *L, int insert_finalizer);
+/* cleans lmprof data and restore allocation function */
+static void          destroy(lua_State *L, lmprof_State *st, int rm_finalizer);
+/* updates memory allocation of a function */
+static void          update(lua_State *L, lmprof_State *st, lua_Debug * far,
+                            size_t mem, size_t total_mem, int update_types);
+static lmprof_State* get_lmprof_state(lua_State *L);
+static lmprof_State* new_lmprof_state(lua_State *L);
 
 /* FUNCTIONS USED BY LUA */
 
+/* restores previous Lua info and cleans lmprof data */
+static int   finalize(lua_State *L);
 /* allocation function used by Lua when lmprof is used */
-static int   finalize (lua_State *L);
-static void* alloc    (void *ud, void *ptr, size_t osize, size_t nsize);
-static void  hook     (lua_State *L, lua_Debug *ar);
+static void* alloc(void *ud, void *ptr, size_t osize, size_t nsize);
+/* handles Lua hook calls */
+static void  hook(lua_State *L, lua_Debug *ar);
 
 /* }================================================================== */
 
@@ -86,7 +95,6 @@ static void  hook     (lua_State *L, lua_Debug *ar);
 ** STATIC VARIABLES
 ** ===================================================================
 */
-static lmprof_State gst;
 
 /* }================================================================== */
 
@@ -96,6 +104,14 @@ static lmprof_State gst;
 ** ===================================================================
 */
 
+static lmprof_State* get_lmprof_state (lua_State *L) {
+  lmprof_State *st;
+  lua_getfield(L, LUA_REGISTRYINDEX, LMPROF_UD_ALLOC);
+  st = (lmprof_State*) lua_touserdata(L, -1);
+  lua_pop(L,1);
+  return st;
+}
+
 static void update (lua_State *L, lmprof_State *st, lua_Debug * far,
                           size_t self_mem, size_t total_mem, int update_type) {
   lmprof_Hash v;
@@ -104,7 +120,7 @@ static void update (lua_State *L, lmprof_State *st, lua_Debug * far,
   lua_Debug par;
 
   switch (update_type) {
-    case LMPROF_UPDATE_ROOT:
+    case LMPROF_UPDATE_ROOT:  /* stop was called, do not get parent */
       lua_getinfo(L, "f", far);
       function = (uintptr_t) lua_topointer(L, -1);
       parent = 0;
@@ -112,20 +128,31 @@ static void update (lua_State *L, lmprof_State *st, lua_Debug * far,
     case LMPROF_UPDATE_CALL:
       lua_getinfo(L, "f", far);
       function = (uintptr_t) lua_topointer(L, -1);
-      lua_getstack(L, 1, &par);
-      lua_getinfo(L, "f", &par);
-      parent = (uintptr_t) lua_topointer(L, -1);
+      if (lua_getstack(L, 1, &par)) {
+        lua_getinfo(L, "f", &par);
+        parent = (uintptr_t) lua_topointer(L, -1);
+      } else {
+        parent = 0;
+      }
       break;
     case LMPROF_UPDATE_TAIL_CALL:
+      /*
+       * in tailcall cases the current env is the new tailcall function
+       * therefore, we need to first get the parent (returning function)
+       * and then the grandparent (returning function parent)
+       */
       lua_getstack(L, 1, far);
       lua_getinfo(L, "f", far);
       function = (uintptr_t) lua_topointer(L, -1);
       if (st->tail_parent != 0) {
         parent = st->tail_parent;
       } else {
-        lua_getstack(L, 2, &par);
-        lua_getinfo(L, "f", &par);
-        parent = (uintptr_t) lua_topointer(L, -1);
+        if (lua_getstack(L, 2, &par)) {
+          lua_getinfo(L, "f", &par);
+          parent = (uintptr_t) lua_topointer(L, -1);
+        } else {
+          parent = 0;
+        }
       }
       st->tail_parent = function;
       break;
@@ -140,71 +167,51 @@ static void update (lua_State *L, lmprof_State *st, lua_Debug * far,
   lmprof_hash_update(st->func_calls, v, self_mem, total_mem);
 }
 
-static void set_lua_alloc (lua_State *L, int remove_finalizer) {
-  lmprof_Alloc *s;
-
-  /* get original alloc function and opaque pointer */
-  lua_pushstring(L, LMPROF_UD_ALLOC);
-  lua_rawget(L, LUA_REGISTRYINDEX);
-  s = (lmprof_Alloc*) lua_touserdata(L, -1);
-
-  /* the library was not initialized (start not called) */
-  if (s == NULL) {
-    luaL_error(L, "lmprof was not properly innitialized. Try calling 'start'.");
-  }
-
-  /* restore original allocation function */
-  lua_setallocf(L, s->f, s->ud);
-
-  if (remove_finalizer) {
-    lua_pushnil(L);
-    lua_setmetatable(L, -2);
-  }
-}
-
-static void set_lmprof_alloc (lua_State *L, int insert_finalizer) {
-  static lua_Alloc f;
-  static void *ud;
-  /* get default allocation function */
-  f = lua_getallocf(L, &ud);
-
-  /* check if start has been called before */
-  if (f == alloc) {
-    /* restore default allocation function and remove library finalizer */
-    lmprof_Alloc *s;
-    lua_getfield(L, LUA_REGISTRYINDEX, LMPROF_UD_ALLOC);
-    s = (lmprof_Alloc *) lua_touserdata(L, -1);
-    lua_setallocf(L, s->f, s->ud);
-    lua_getmetatable(L, -1);
-    lua_pushnil(L);
-    lua_setfield(L, -2, "__gc");
-
-    lua_pushstring(L, "calling lmprof start function twice");
-    lua_error(L);
-  }
-
-  /* create data_structure and set finalizer */
-  if (insert_finalizer) {
-    create_finalizer(L, f, ud);
-    lua_setallocf(L, alloc, ud);
-  }
-}
-
 static void hook (lua_State *L, lua_Debug *ar) {
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
-  st->increment_alloc_count = 0;
+  st->increment_alloc_count = 0;  /* disable alloc count inside hook */
   if (st->ignore_return) {
     st->ignore_return = 0;
     return;
   }
 
   switch (ar->event) {
+    case LUA_HOOKCALL: {  /* push call onto stack */
+      int err = lmprof_stack_push(st->mem_stack, st->alloc_count);
+      if (err) {
+        lmprof_lstrace_write(L, LMPROF_STACK_DUMP_FILENAME);
+        destroy(L, st, TRUE);
+        luaL_error(L, "lmprof stack overflow (current size = %d). We consider \
+your call chain very big. '%s' contains the full stack trace and '%s' contais \
+the memory profile.", LMPROF_STACK_SIZE, LMPROF_STACK_DUMP_FILENAME,
+                                         st->output_filename);
+      }
+      break;
+    }
+    case LUA_HOOKRET: {  /* in case of alloc, update function */
+      if (lmprof_stack_equal(st->mem_stack, st->alloc_count)) {
+        int err = lmprof_stack_pop(st->mem_stack);
+        if (err) {
+          destroy(L, st, TRUE);
+          luaL_error(L, "unable to pop from empty stack. you did not call stop \
+or called stop in a level 'upper' than start was called.");
+        }
+      } else {
+        size_t total_mem;
+        size_t self_mem = lmprof_stack_smart_pop(st->mem_stack, st->alloc_count, &total_mem);
+        if(st->tail_parent) {
+          st->tail_parent = 0;  /* returning from tailcall, erase flag */
+        }
+        update(L, st, ar, self_mem, total_mem, LMPROF_UPDATE_CALL);
+      }
+      break;
+    }
+    /* push call onto stack and, in case of alloc, update function */
     case LUA_HOOKTAILCALL:
       if (lmprof_stack_equal(st->mem_stack, st->alloc_count)) {
         int err = lmprof_stack_pop(st->mem_stack);
         if (err) {
-          set_lua_alloc(L, TRUE);
-          destroy(L, st, LMPROF_DEFAULT_OUTPUT_FILENAME);
+          destroy(L, st, TRUE);
           luaL_error(L, "unable to pop from empty stack. you did not call stop \
 or called stop in a level 'upper' than start was called.");
         }
@@ -215,45 +222,33 @@ or called stop in a level 'upper' than start was called.");
       }
       lmprof_stack_push(st->mem_stack, st->alloc_count);
       break;
-    case LUA_HOOKCALL: {
-      int err = lmprof_stack_push(st->mem_stack, st->alloc_count);
-      if (err) {
-        lmprof_lstrace_write(L, LMPROF_STACK_DUMP_FILENAME);
-        set_lua_alloc(L, TRUE);
-        destroy(L, st, LMPROF_DEFAULT_OUTPUT_FILENAME);
-        luaL_error(L, "lmprof stack overflow (current size = %d). We consider \
-your call chain very big. '%s' contains the full stack trace and '%s' contais \
-the memory profile.", LMPROF_STACK_SIZE, LMPROF_STACK_DUMP_FILENAME,
-                                         LMPROF_DEFAULT_OUTPUT_FILENAME);
-      }
-      break;
-    }
-    case LUA_HOOKRET:
-      if (lmprof_stack_equal(st->mem_stack, st->alloc_count)) {
-        int err = lmprof_stack_pop(st->mem_stack);
-        if (err) {
-          set_lua_alloc(L, TRUE);
-          destroy(L, st, LMPROF_DEFAULT_OUTPUT_FILENAME);
-          luaL_error(L, "unable to pop from empty stack. you did not call stop \
-or called stop in a level 'upper' than start was called.");
-        }
-      } else {
-        size_t total_mem;
-        size_t self_mem = lmprof_stack_smart_pop(st->mem_stack, st->alloc_count, &total_mem);
-        if(st->tail_parent) {
-          st->tail_parent = 0;
-        }
-        update(L, st, ar, self_mem, total_mem, LMPROF_UPDATE_CALL);
-      }
-      break;
   }
-  st->increment_alloc_count = 1;
+  st->increment_alloc_count = 1;  /* enable alloc count */
 }
 
-static void destroy (lua_State *L, lmprof_State *st, const char *filename) {
+static void destroy (lua_State *L, lmprof_State *st, int rm_finalizer) {
+  /* restore alloc function if object being destroyed is the current obj */
+  void *current;
+  lua_getallocf (L, &current);
+  if (current == st) {
+    lua_setallocf(L, st->la.f, st->la.ud);
+  }
+
+  /*
+   * 'if' is used to garantee that 'finalizer' does not overwrite a new obj,
+   * eventhough it could never happen through the lib API.
+   */
+  if (rm_finalizer) {
+    lua_getfield(L, LUA_REGISTRYINDEX, LMPROF_UD_ALLOC);
+    lua_pushnil(L);
+    lua_setmetatable(L, -2);
+    lua_pop(L, 1);
+  }
+
   lmprof_stack_destroy(st->mem_stack);
-  lmprof_hash_print(st->func_calls, filename);
+  lmprof_hash_print(st->func_calls, st->output_filename);
   lmprof_hash_destroy(st->func_calls);
+  free(st->output_filename);
   lua_sethook(L, hook, 0, 0);
 }
 
@@ -262,50 +257,41 @@ static void destroy (lua_State *L, lmprof_State *st, const char *filename) {
 ** Restores lua_State original allocation function.
 */
 static int finalize (lua_State *L) {
-  lmprof_State *st = LMPROF_GET_STATE_INFO(L);
-  lmprof_Alloc *s;
-
-  /* check lmprof_Alloc */
-  if (!lua_isuserdata(L, -1)) {
-    lua_pushstring(L, "incorrect argument");
-    lua_error(L);
-  }
-
-  /* get lmprof_Alloc and restore original allocation function */
-  s = (lmprof_Alloc *) lua_touserdata(L, -1);
-  if (s->f != lua_getallocf (L, NULL)) {
-    lua_setallocf(L, s->f, s->ud);
-    destroy(L, st, LMPROF_DEFAULT_OUTPUT_FILENAME);
-  }
-
+  lmprof_State *st = lua_touserdata(L, -1);
+  destroy(L, st, FALSE);
   return 0;
 }
 
 /* Register finalize function as metatable */
-static void create_finalizer (lua_State *L, lua_Alloc f, void *ud) {
-  lmprof_Alloc *s;
+static lmprof_State* new_lmprof_state (lua_State *L) {
+  lmprof_State *st = (lmprof_State*) lua_newuserdata(L, 
+                                               (size_t) sizeof(lmprof_State));
+  static lua_Alloc f;
+  static void *ud;
+  f = lua_getallocf(L, &ud);
+
+  /* create 'alloc' userdata (one ud for each Lua_State) */
+  st->la.f = f;
+  st->la.ud = ud;
 
   /* create metatable with finalize function (__gc field) */
   luaL_newmetatable(L, "lmprof_mt");
   lua_pushcfunction(L, finalize);
   lua_setfield(L, -2, "__gc");
 
-  /* create 'alloc' userdata (one ud for each Lua_State) */
-  s = (lmprof_Alloc*) lua_newuserdata(L, (size_t) sizeof(lmprof_Alloc));
-  s->f = f;
-  s->ud = ud;
-
   /* set userdata metatable */
-  luaL_setmetatable(L, "lmprof_mt");
+  lua_setmetatable(L, -2);
 
   /* insert userdata into registry table so it cannot be collected */
   lua_setfield(L, LUA_REGISTRYINDEX, LMPROF_UD_ALLOC);
+
+  return st;
 }
 
 
 static void *alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
-  lmprof_State *st = &gst;  /* TODO: solve this problem */
-  (void) ud; /* not used */
+  /* opaque pointer is the library state */
+  lmprof_State *st = (lmprof_State *) ud;
 
   if (nsize == 0) {  /* check lua manual for more details */
     free(ptr);
@@ -322,7 +308,16 @@ static void *alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
 static int start (lua_State *L) {
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
 
-  set_lmprof_alloc(L, TRUE);
+  /* if start has been called before, erase lib */
+  if (st != NULL) {
+    destroy(L, st, TRUE);
+    lua_pushstring(L, "calling lmprof start function twice");
+    lua_error(L);
+  }
+
+  /* create data_structure and set new alloc function */
+  st = new_lmprof_state(L);
+  lua_setallocf(L, alloc, (void *) st);
 
   /* create auxiliary structures and set call/return hook */
   st->alloc_count = 0;
@@ -332,7 +327,22 @@ static int start (lua_State *L) {
   st->mem_stack = lmprof_stack_create();
   st->func_calls = lmprof_hash_create();
 
-  /* push calling function */
+  /* check if there is an output_filename */
+  if (lua_gettop(L)) {
+    /* strcpy because Lua string could be collected */
+    const char *s = luaL_checkstring(L, 1);
+    st->output_filename = malloc(strlen(s) + 1);
+    strcpy(st->output_filename, s);
+  } else {
+    /* strcpy to simplify stop calling free, if user passes in both calls */
+    const char *s = LMPROF_DEFAULT_OUTPUT_FILENAME;
+    st->output_filename = malloc(strlen(s) + 1);
+    strcpy(st->output_filename, s);
+  }
+
+  /* push parent to enable not using lmprof.stop in main script */
+  lmprof_stack_push(st->mem_stack, st->alloc_count);
+  /* push current function */
   lmprof_stack_push(st->mem_stack, st->alloc_count);
 
   lua_sethook(L, hook, LUA_MASKCALL | LUA_MASKRET, 0);
@@ -342,24 +352,36 @@ static int start (lua_State *L) {
 
 static int stop (lua_State *L) {
   lmprof_State *st = LMPROF_GET_STATE_INFO(L);
-  const char *filename = LMPROF_DEFAULT_OUTPUT_FILENAME;
   size_t self_mem;
   size_t total_mem;
   lua_Debug ar;
 
+  st->increment_alloc_count = 0;
+
+  /* check if there is an output_filename and update previous value */
   if (lua_gettop(L)) {
-    filename = luaL_checkstring(L, 1);
+    const char *s = luaL_checkstring(L, 1);
+    st->output_filename = realloc(st->output_filename, strlen(s) + 1);
+    strcpy(st->output_filename, s);
   }
 
+  if (lmprof_stack_size(st->mem_stack) != LMPROF_STOP_QUEUE_SIZE) {
+    luaL_error(L, "stop was not called at the same level as start.");
+  }
   
-  /* register calling function and call sizes */
   lmprof_stack_pop(st->mem_stack);  /* pop stop own call */
+
+  /* update last function as root */
   self_mem = lmprof_stack_smart_pop(st->mem_stack, st->alloc_count, &total_mem);
   lua_getstack(L, 1, &ar);
   update(L, st, &ar, self_mem, total_mem, LMPROF_UPDATE_ROOT);
 
-  set_lua_alloc(L, TRUE);
-  destroy(L, st, filename);
+  /* 
+   * ignore last call on stack. if stop is never called, this last call
+   * is updated and finalize clear lmprof.
+   */
+
+  destroy(L, st, TRUE);
   return 0;
 }
 

@@ -18,9 +18,8 @@ local function mnl2ff (len)
   local nf = NUMBER_FORMAT[(len%3)+1] .. " %sB" -- lua table starts at 1
   local x = math.floor((len - 2)/3)
   local unit = UNITS[x]
-  local pow = x * 3
   return function (n)
-    return string.format(nf, n/1024^x, unit)
+    return string.format(nf, n/(1024^x), unit)
   end
 end
 

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall -ansi -pedantic -fPIC -shared
+CFLAGS = -Wall -ansi -pedantic -fPIC -shared
 
 LUA_DIR = /usr/include/lua5.2
 LUA_LIB = /usr/local/lib/lua/5.2

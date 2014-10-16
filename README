@@ -8,7 +8,7 @@ A Memory Profiler for the Lua language
 * Last Modification: aug 18 2014
 * See Copyright Notice in LICENSE
 
-lmprof is a library for the Lua language (version 5.2) that collects
+lmprof is a library for the Lua language (version 5.2 or higher) that collects
 information about the memory usage of a program throughout its execution and
 then analyze the collected data to generate reports.
 The memory use of the program using our library can be seen in a flat
@@ -22,13 +22,19 @@ local lmprof = require"lmprof"
 *
 * lmprof monitor API
 *
--- starts the memory monitor
-lmprof.start()
-
--- stops the memory monitor and write to a file in Lua table format the number
+-- starts the memory monitor and write to a file in Lua table format the number
 -- of calls, the memory allocated only by the function and the memory allocated
 -- by the function and its children for all the pairs (function, parent) that
 -- allocated memory.
+-- can be used without stop to monitor the full execution.
+-- if start is used in a "inner function level" (ex: inside a function call)
+-- there must be a stop in the same function level.
+-- if no filename is passed the output is written to "lmprof_default_output.lua"
+lmprof.start([output_file_name])
+
+-- stops the memory monitor and output to a file in Lua table format.
+-- passing a filename in this call overwrites the filename passed to start.
+-- as said before, stop must be used in the same function level as start.
 lmprof.stop([output_file_name])
 
 *
@@ -53,8 +59,10 @@ The optional size parameter limits the number of functions of the output.
 *
 Calling the start function twice raises an error.
 
-Not calling the stop function will cause an error.
-
 The library monitors only the interval between start and stop. Memory operations
 done before the start call, or after the stop call are not counted.
 
+If you call start in the main script execution, you do not need to call stop.
+
+For multiple-states, one should explicity indicate different files, otherwise
+the output of the last state will overwritte the others.

@@ -9,9 +9,10 @@ echo "==  Generating reduce test files  =="
 echo "===================================="
 
 SIZE=19  # skip 2html identical parent conflict
-cd $LMPROF_HOME/test/
-for f in *.lua;
+cd $LMPROF_HOME/test/out/
+for f in lmprof_*.lua;
 do
+  f=${f#lmprof_}
   LMPROF_FILE=$LMPROF_HOME/test/out/lmprof_$f
   REDUCE_FILE=$LMPROF_HOME/test/out/reduce_${f%%.lua}.txt
   if [ ! -f $LMPROF_FILE ]; then
