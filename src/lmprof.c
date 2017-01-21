@@ -27,6 +27,7 @@
 ** STRUCTS
 ** ===================================================================
 */
+static long func_counter = 0;
 
 /* Keeps the default allocation function and the ud of a lua_State */
 typedef struct lmprof_Alloc {
@@ -137,7 +138,7 @@ static void update (lua_State *L, lmprof_State *st, lua_Debug * far,
       break;
     case LMPROF_UPDATE_TAIL_CALL:
       /*
-       * in tailcall cases the current env is the new tailcall function
+       * in tailcall cases, the current env is the new tailcall function
        * therefore, we need to first get the parent (returning function)
        * and then the grandparent (returning function parent)
        */
@@ -156,7 +157,27 @@ static void update (lua_State *L, lmprof_State *st, lua_Debug * far,
       }
       st->tail_parent = function;
       break;
+    default:
+      luaL_error(L, "invalid update type. internal error");
+      exit(1);
   }
+
+  /* TODO: verify if parent == function and handle recursive calls 
+     guardar f->f ou m->f?
+     use st->rec
+if (function == parent) {
+  if (rec < 0) rec = 0;
+  rec = rec + self_mem;
+  return
+}
+
+if (rec > 0) {
+  self_mem = self_mem + rec
+  provavel gambiarra para atualizar o fix!!
+}
+}
+
+  */
 
   v = lmprof_hash_get(st->func_calls, function, parent);
   if (v == NULL) {
@@ -174,6 +195,8 @@ static void hook (lua_State *L, lua_Debug *ar) {
     st->ignore_return = 0;
     return;
   }
+
+func_counter++;
 
   switch (ar->event) {
     case LUA_HOOKCALL: {  /* push call onto stack */
@@ -199,7 +222,7 @@ or called stop in a level 'upper' than start was called.");
       } else {
         size_t total_mem;
         size_t self_mem = lmprof_stack_smart_pop(st->mem_stack, st->alloc_count, &total_mem);
-        if(st->tail_parent) {
+        if(st->tail_parent) {/* TODO: fix bug. last tailcall has wrong parent*/
           st->tail_parent = 0;  /* returning from tailcall, erase flag */
         }
         update(L, st, ar, self_mem, total_mem, LMPROF_UPDATE_CALL);
@@ -380,6 +403,7 @@ static int stop (lua_State *L) {
    * ignore last call on stack. if stop is never called, this last call
    * is updated and finalize clear lmprof.
    */
+printf("FUNCTION HOOK CALLS: %ld\n", func_counter);
 
   destroy(L, st, TRUE);
   return 0;

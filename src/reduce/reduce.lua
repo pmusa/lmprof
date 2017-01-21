@@ -1,9 +1,10 @@
 local function new_func(name, ref)
   return {
     ref = ref,
-    mem_perc = 0,
-    mem_cum = 0,
     mem_self = 0, 
+    mem_pself = 0,
+    mem_cum = 0,
+    mem_pcum = 0,
     calls = 0,
     mpc_cum = 0,
     mpc_self = 0,
@@ -60,7 +61,8 @@ local function reduce(call_table)
 
   -- iterate function nodes, calculate node accumulated values and set children
   for fref,f in pairs(func_table) do
-    f.mem_perc = (f.mem_self/ts) * 100
+    f.mem_pself = (f.mem_self/ts) * 100
+    f.mem_pcum = (f.mem_cum/ts) * 100
     f.mpc_self = f.mem_self/f.calls
     f.mpc_cum  = f.mem_cum/f.calls
     for pref,pt in pairs(f.parents) do

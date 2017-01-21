@@ -21,7 +21,7 @@ local SEPARATOR = "="
 local function hprint(msg, bl)
   local size = string.len(msg)
   local header = "%s %s %s"
-  local highlight = string.rep(SEPARATOR, (78 - size)/2)
+  local highlight = string.rep(SEPARATOR, math.floor((78 - size)/2))
   local s = string.format(header, highlight, msg, highlight)
   if size%2 ~= 0 then
     s = s .. SEPARATOR
@@ -43,7 +43,7 @@ local tsize = 0
 local tf = 0
 for k,v in pairs(func_table) do
   tsize = tsize + 1
-  if v.mem_perc > 1 then
+  if v.mem_pself > 1 then
     tf = tf + 1
   end
 end

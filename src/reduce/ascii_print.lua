@@ -5,7 +5,7 @@ local UNITS = {"K", "M", "G", "T", "P", "E", "Z", "Y"}
 local NUMBER_FORMAT = {"%5.1f", "%5.0f", "%5.2f"}
 
 local flat_order = {
-  "mem_perc", "mem_self", "mem_cum", "calls", "mpc_self", "mpc_cum", "name", 
+  "mem_pself", "mem_self", "mem_cum", "calls", "mpc_self", "mpc_cum", "name", 
 }
 
 -- max number length to format function
@@ -91,7 +91,7 @@ function flat_print(func_table, max)
     if max and i == max+1 then break end
     local p = {}
     for i,k in ipairs(flat_order) do
-      if k:match("cum") or k:match("self") then
+      if k:match("_cum$") or k:match("_self$") then
         table.insert(p, msft[k](v[k]))
       else
         table.insert(p, v[k])
@@ -102,7 +102,7 @@ function flat_print(func_table, max)
 end
 
 local function call_graph_print(func_table, max)
-  local ftarray = lt2oa(func_table)
+  local ftarray = lt2oa(func_table, "mem_cum")
 
   -- get maxlen for numeric fields and format for memory size fields
   local maxlen, msft = mlmsft(ftarray, max, func_table)
@@ -110,7 +110,7 @@ local function call_graph_print(func_table, max)
   -- [[ print header ]] --
   local header = {
 "                                      %scalled/total%s  parents",
-" index    %%mem    self    cumulative  %scalled (rec)%s  name  %sindex",
+" index    %%mem  cumulative    self    %scalled (rec)%s  name  %sindex",
 "                                      %scalled/total%s  children",
   }
 
@@ -136,16 +136,16 @@ local function call_graph_print(func_table, max)
     local adjc = string.rep(" ", maxlen.calls - string.len(oc))
     local adjn = string.rep(" ", maxlen.name - string.len(n))
     if not mp then  -- parent or child
-      print(string.format(flcgpp, ms, mc, c, oc, adjc, n, adjn, i))
+      print(string.format(flcgpp, mc, ms, c, oc, adjc, n, adjn, i))
     else  -- the current function
       local l
       if oc ~= 0 then  -- there are recursive calls
-        l = string.format(flcgfp, i, mp, ms, mc, c, oc, adjc, n, adjn, i)
+        l = string.format(flcgfp, i, mp, mc, ms, c, oc, adjc, n, adjn, i)
       else  -- no recursive calls
         local tmp = string.gsub(flcgfp, "%(%%d%)", "%%s")
         adjc = string.rep(" ", maxlen.calls + 2)  -- plus 2 for ()
         oc = ""
-        l = string.format(tmp, i, mp, ms, mc, c, oc, adjc, n, adjn, i)
+        l = string.format(tmp, i, mp, mc, ms, c, oc, adjc, n, adjn, i)
       end
       local _, i = string.find(l, "%s*")
       local l = string.rep(" ", i) .. string.gsub(string.sub(l, i+1), " ", "-")
@@ -158,12 +158,14 @@ local function call_graph_print(func_table, max)
 
     local pa = lt2oa(f.parents)
     for _,p in ipairs(pa) do
+-- local x = mnl2ff(string.len(p.mem_self))
+-- cglprint(x(p.mem_self), msft.mem_cum(p.mem_cum), p.calls,
       cglprint(msft.mem_self(p.mem_self), msft.mem_cum(p.mem_cum), p.calls,
                f.calls, func_table[p.parent].name, n2i(ftarray[p.parent]))
     end
 
     cglprint(msft.mem_self(f.mem_self), msft.mem_cum(f.mem_cum), f.calls,
-             f.calls_rec or 0, f.name, n2i(i), f.mem_perc)
+             f.calls_rec or 0, f.name, n2i(i), f.mem_pcum)
 
     local ca = lt2oa(f.children)
     for _, c in ipairs(ca) do
