@@ -1,15 +1,15 @@
 CC = gcc
 CFLAGS = -Wall -ansi -pedantic -fPIC -shared
 
-LUA_DIR = /usr/include/lua5.2
-LUA_LIB = /usr/local/lib/lua/5.2
+LUA_DIR = /usr/local/include
+LUA_LIB = /usr/local/lib/lua/5.3
 LUA_CFLAGS = -I$(LUA_DIR)
-LUA_LIBS = -llua5.2
+LUA_LIBS = -L/usr/local/lib -llua
 
 all: lmprof.so
 
 install: lmprof.so
-	mkdir -p $(LUA_LIB)/lmprof && cp src/reduce/*.lua $(LUA_LIB)/lmprof && cp lmprof.so /usr/local/lib/lua/5.2/
+	mkdir -p $(LUA_LIB)/lmprof && cp src/reduce/*.lua $(LUA_LIB)/lmprof && cp lmprof.so $(LUA_LIB)
 
 lmprof.so: lmprof.o
 	cd src && $(CC) lmprof_lstrace.o lmprof_stack.o lmprof_hash.o lmprof.o -o lmprof.so $(CFLAGS) $(LUA_LIBS) && mv lmprof.so ../
