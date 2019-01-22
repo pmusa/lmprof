@@ -293,14 +293,13 @@ static void *alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
   /* opaque pointer is the library state */
   lmprof_State *st = (lmprof_State *) ud;
 
-  if (nsize == 0) {  /* check lua manual for more details */
-    free(ptr);
-    return NULL;
-  } else if (ptr == NULL) {  /* case (malloc): osize holds object type */
-    osize = 0;
+  size_t sz = 0;
+  if (ptr != NULL) {  /* case (malloc): osize holds object type */
+    sz = osize;
   }
-  if (nsize > osize && st->increment_alloc_count == 1) {
-    st->alloc_count = st->alloc_count + (nsize - osize);
+
+  if (nsize > sz && st->increment_alloc_count == 1) {
+    st->alloc_count = st->alloc_count + (nsize - sz);
   }
   // return realloc(ptr, nsize);
   return st->la.f(st->la.ud, ptr, osize, nsize);
