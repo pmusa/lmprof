@@ -302,7 +302,8 @@ static void *alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
   if (nsize > osize && st->increment_alloc_count == 1) {
     st->alloc_count = st->alloc_count + (nsize - osize);
   }
-  return realloc(ptr, nsize);
+  // return realloc(ptr, nsize);
+  return st->la.f(st->la.ud, ptr, osize, nsize);
 }
 
 static int start (lua_State *L) {
